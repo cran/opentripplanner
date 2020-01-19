@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Malcolm Morgan" />
+
+<meta name="date" content="2020-01-06" />
+
+<title>Known Issues</title>
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Known Issues</h1>
+<h4 class="author">Malcolm Morgan</h4>
+<h4 class="date">2020-01-06</h4>
+
+
+
+<p>This vignette highlights some known limitations or bugs with OpenTripPlanner as well as suggested solutions.</p>
+<div id="getting-help-and-reporting-bugs" class="section level2">
+<h2>Getting help and reporting bugs</h2>
+<div id="opentripplanner" class="section level3">
+<h3>OpenTripPlanner</h3>
+<ul>
+<li><a href="https://groups.google.com/forum/#!forum/opentripplanner-users">OTP Users Group</a></li>
+<li><a href="https://github.com/opentripplanner/OpenTripPlanner/issues">OTP GitHub Issues</a></li>
+</ul>
+</div>
+<div id="opentripplanner-for-r" class="section level3">
+<h3>OpenTripPlanner for R</h3>
+<ul>
+<li><a href="https://github.com/ropensci/opentripplanner/issues">OTP GitHub Issues</a></li>
+</ul>
+</div>
+</div>
+<div id="reasons-for-routing-to-fail" class="section level2">
+<h2>Reasons for Routing to Fail</h2>
+<p>If you find OTP can not find a route here are some common reasons to check:</p>
+<div id="start-or-end-is-too-far-from-the-road-network" class="section level3">
+<h3>Start or End is too far from the road network</h3>
+<p>OTP will snap fromPlace and toPlace coordinates to the road network, but only for a limited distance. If your points are far from the road network (e.g. in a lake or middle of a park) then OTP will fail to find a route.</p>
+</div>
+<div id="mode-specific-limits" class="section level3">
+<h3>Mode Specific Limits</h3>
+<p>OTP does not support all mode combinations (e.g. walk + drive) so some places may only be accessible by certain modes. For example, you can’t walk on a motorway or drive on a path. Use the debug layers to check for mode restrictions.</p>
+</div>
+<div id="maximum-walk-to-transit" class="section level3">
+<h3>Maximum walk to transit</h3>
+<p>By default, OTP caps the maximum walking distance to a transit stop at a low level, so some areas are unreachable by transit. Increase the maximum walking distance to get better results.</p>
+</div>
+<div id="driving-on-roads-with-cycleway-tag" class="section level3">
+<h3>Driving on Roads with cycleway tag</h3>
+<p>A known bug that stops driving on any road with cycling infrastructure. <a href="https://groups.google.com/forum/#!topic/opentripplanner-users/BOv1J32k6Sc" class="uri">https://groups.google.com/forum/#!topic/opentripplanner-users/BOv1J32k6Sc</a></p>
+</div>
+</div>
+<div id="speeding-up-routing" class="section level2">
+<h2>Speeding up routing</h2>
+<p>If you are doing a large amount of routing consider the following options.</p>
+<ol style="list-style-type: decimal">
+<li>Use multicore routing using <code>ncores</code> argument of <code>otp_plan()</code></li>
+<li>Reduce the area, for example, if you are only routing in one city you don’t need a whole country graph.</li>
+<li>Remove unneeded roads using <a href="https://wiki.openstreetmap.org/wiki/Osmfilter">osmfilter</a> or <a href="https://github.com/ITSLeeds/OSMtools">OSMtools</a> for example if you are only interested in driving you can remove footpaths and cycleways. This will simplify your graph and provide a small performance boost.</li>
+<li>Upgrading your computer, a new fast CPU with more cores will route faster.</li>
+</ol>
+</div>
+<div id="gtfs-data-for-the-uk" class="section level2">
+<h2>GTFS Data for the UK</h2>
+<p>See <a href="https://github.com/ITSLeeds/UK2GTFS" class="uri">https://github.com/ITSLeeds/UK2GTFS</a></p>
+</div>
+<div id="elevation-data" class="section level2">
+<h2>Elevation Data</h2>
+<p>It is common for GeoTIFF to have a no data value often the maximum possible value. OTP can misinterpret this as an elevation value. So set your no data values in your elevation data to something more plausible like 0.</p>
+<p>Note that OTP does not support all types of GeoTIFF compression so you may have to change the compression type of the image if you are experiencing problems.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
