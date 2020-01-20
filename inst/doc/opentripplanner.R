@@ -21,7 +21,7 @@
 #  otp_dl_demo(path_data)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  log <- otp_build_graph(otp = path_otp, dir = path_data)
+#  log1 <- otp_build_graph(otp = path_otp, dir = path_data)
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  log1 <- otp_build_graph(otp = path_otp, dir = path_data, memory = 10240)
