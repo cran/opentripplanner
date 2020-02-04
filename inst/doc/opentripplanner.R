@@ -1,10 +1,6 @@
-## ----install, eval=FALSE------------------------------------------------------
-#  # If you do not already have the devtools package
-#  install.packages("devtools")
-#  # Install the package from GitHub
-#  devtools::install_github("ropensci/opentripplanner")
-#  # Load the package
-#  library(opentripplanner)
+## ----installCRAN, eval=FALSE--------------------------------------------------
+#  install.packages("opentripplanner") # Install Package
+#  library(opentripplanner)            # Load Package
 
 ## ---- eval=FALSE--------------------------------------------------------------
 #  path_data <- file.path(tempdir(), "OTP")
