@@ -1,6 +1,6 @@
-35f798b594a8a7853e2e0f09e3c405fd *DESCRIPTION
+aa7e13363eb92038799fe4604da17eb6 *DESCRIPTION
 22b11a0926d50a656bd1e2d6fe5e68cb *NAMESPACE
-ee0fd96b0a3f8bd473a9fac2baf409cf *NEWS.md
+0064033ec47e80df24597f8109716720 *NEWS.md
 0113768d18f2ceea02bbf503513409ee *R/opentripplanner-package.R
 b3bad040a090f4ac50e35c0b7e3577de *R/otp-config.R
 144c4a6609ec1dce63cc28a4aba81836 *R/otp-connect.R
@@ -14,15 +14,15 @@ adf6fc85b0edcec67c6c59b4912aa657 *R/otp-plan.R
 4740624f93f6b9646e120773576a72a0 *inst/CITATION
 29e50773c7f05d75971c6b5b88c80106 *inst/doc/advanced_features.R
 ed90701c94afbdc088e472511ebd934e *inst/doc/advanced_features.Rmd
-df8c96020aeab21bea7ad42b53493aff *inst/doc/advanced_features.html
+54bd3d3793850c383f5f6fe0d8108d83 *inst/doc/advanced_features.html
 4ab12537eb970ec243162dcf999c59d7 *inst/doc/known_issues.Rmd
-0edeeb1355aed3304eef245339de4712 *inst/doc/known_issues.html
+0600349dcab74ef0010c1614e95062de *inst/doc/known_issues.html
 7098bab09084b231065713a209001276 *inst/doc/opentripplanner.R
 00bb4f5936535324019fd8e28baa5c67 *inst/doc/opentripplanner.Rmd
-1745cf7ef3774139032c25c6febc53a7 *inst/doc/opentripplanner.html
+d9be2559f5ea9308914216cc9991569e *inst/doc/opentripplanner.html
 084184715fe3a7dffdd0a567e621817f *inst/doc/prerequisites.R
 2b12c6fc11a83de9f1e1cac2186b8afc *inst/doc/prerequisites.Rmd
-6b0a7918dc786d4e9573f73566c1a12e *inst/doc/prerequisites.html
+1848703c4749ca2d32b8ed4d62a9436a *inst/doc/prerequisites.html
 2b028b2fdcd28ee817f87ed897ef6c4e *man/figures/logo.png
 9dfc7d0f531e48938011da9f7e350ce9 *man/opentripplanner-package.Rd
 1d588001c897932f4813cd905eb1361c *man/otp_build_graph.Rd
@@ -39,7 +39,7 @@ a8973e6b7e95c5deadfeda7f22b52207 *man/otp_plan.Rd
 b114033f76159182a898105a17e90ad0 *man/otp_write_config.Rd
 8f78fa3ec628e47c7ae7836412c126cf *tests/testthat.R
 186946d9c05dae5fbdd2141cb0588e87 *tests/testthat/test_01_internal_funcs.R
-1c2576794d7005b05588fc3953e69984 *tests/testthat/test_02_without_OTP.R
+f13f644cebd00ba0a00f3af342c240d1 *tests/testthat/test_02_without_OTP.R
 5e20b3e7572defbf9ed7392ec45bbd1c *tests/testthat/test_03_with_OTP.R
 0e60189e1a950df7cc1fa3898c763af3 *tests/testthat/test_04_with_public_API.R
 ed90701c94afbdc088e472511ebd934e *vignettes/advanced_features.Rmd
