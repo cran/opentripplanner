@@ -1,6 +1,6 @@
 Package: opentripplanner
 Title: Setup and connect to 'OpenTripPlanner'
-Version: 0.2.0.8
+Version: 0.2.1.0
 Authors@R: c(
     person("Malcolm", "Morgan", email = "m.morgan1@leeds.ac.uk", role = c("aut","cre"), 
       comment = c(ORCID = "0000-0002-9488-9183")),
@@ -26,14 +26,15 @@ Encoding: UTF-8
 LazyData: true
 Imports: checkmate, dplyr, geodist, googlePolylines, httr, jsonlite,
         pbapply, sf
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Suggests: covr, knitr, rmarkdown, testthat
 VignetteBuilder: knitr
+Depends: R (>= 2.10)
 NeedsCompilation: no
-Packaged: 2020-02-06 09:16:05 UTC; malcolm
+Packaged: 2020-04-14 16:25:05 UTC; malco
 Author: Malcolm Morgan [aut, cre] (<https://orcid.org/0000-0002-9488-9183>),
   Marcus Young [aut] (<https://orcid.org/0000-0003-4627-1116>),
   Robin Lovelace [aut] (<https://orcid.org/0000-0001-5679-6536>),
   Layik Hama [ctb] (<https://orcid.org/0000-0003-1912-4890>)
 Repository: CRAN
-Date/Publication: 2020-02-06 10:10:02 UTC
+Date/Publication: 2020-04-14 17:20:03 UTC

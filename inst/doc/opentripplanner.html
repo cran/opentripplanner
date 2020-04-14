@@ -8,11 +8,11 @@
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Marcus Young, modified by Malcolm Morgan and Robin Lovelace" />
 
-<meta name="date" content="2020-02-06" />
+<meta name="date" content="2020-04-14" />
 
 <title>opentripplanner: getting started</title>
 
@@ -37,7 +37,7 @@ a.sourceLine { text-indent: -1em; padding-left: 1em; }
 pre.numberSource a.sourceLine
   { position: relative; left: -4em; }
 pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
+  { content: attr(title);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
     border: none; pointer-events: all; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
@@ -117,9 +117,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -288,7 +285,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -303,7 +301,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">opentripplanner: getting started</h1>
 <h4 class="author">Marcus Young, modified by Malcolm Morgan and Robin Lovelace</h4>
-<h4 class="date">2020-02-06</h4>
+<h4 class="date">2020-04-14</h4>
 
 
 
@@ -319,9 +317,12 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </div>
 <div id="installation" class="section level2">
 <h2>Installation</h2>
-<p>Install the package as follows:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">install.packages</span>(<span class="st">&quot;opentripplanner&quot;</span>) <span class="co"># Install Package</span></a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(opentripplanner)            <span class="co"># Load Package</span></a></code></pre></div>
+<p>Install the stable version of the package from CRAN as follows:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">install.packages</span>(<span class="st">&quot;opentripplanner&quot;</span>) <span class="co"># Install Package</span></a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw">library</span>(opentripplanner)            <span class="co"># Load Package</span></a></code></pre></div>
+<p>Or you can install the development version from GitHub using the <strong>remotes</strong> package:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">remotes<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;ropensci/opentripplanner&quot;</span>) <span class="co"># Install Package</span></a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="kw">library</span>(opentripplanner)                            <span class="co"># Load Package</span></a></code></pre></div>
 </div>
 <div id="downloading-otp-and-the-demonstration-data" class="section level2">
 <h2>Downloading OTP and the demonstration data</h2>
@@ -329,37 +330,37 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <div id="creating-a-folder-to-store-otp-and-its-data" class="section level3">
 <h3>Creating a folder to store OTP and its data</h3>
 <p>OTP expects its data to be stored in a specific structure, see <a href="https://docs.ropensci.org/opentripplanner/articles/opentripplanner.html#building-your-own-otp-graph">building your own otp graph</a> for more details. We will make a folder called OTP in the temporary directory.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">path_data &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="kw">tempdir</span>(), <span class="st">&quot;OTP&quot;</span>)</a>
-<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">dir.create</span>(path_data) </a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">path_data &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="kw">tempdir</span>(), <span class="st">&quot;OTP&quot;</span>)</a>
+<a class="sourceLine" id="cb3-2" title="2"><span class="kw">dir.create</span>(path_data) </a></code></pre></div>
 <p><strong>You may wish to change this</strong> to keep your files after closing R. Otherwise you will need to download your files and build your graph every time. For example:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">path_data &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="st">&quot;C:/Users/Public&quot;</span>, <span class="st">&quot;OTP&quot;</span>)</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">dir.create</span>(path_data) </a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">path_data &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="st">&quot;C:/Users/Public&quot;</span>, <span class="st">&quot;OTP&quot;</span>)</a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="kw">dir.create</span>(path_data) </a></code></pre></div>
 </div>
 <div id="downloading-otp" class="section level3">
 <h3>Downloading OTP</h3>
 <p>The <code>otp_dl_jar</code> function will download the OTP and save it in the folder we created. The function returns the path to the OTP jar file.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">path_otp &lt;-<span class="st"> </span><span class="kw">otp_dl_jar</span>(path_data)</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">path_otp &lt;-<span class="st"> </span><span class="kw">otp_dl_jar</span>(path_data)</a></code></pre></div>
 </div>
 <div id="downloading-example-data" class="section level3">
 <h3>Downloading Example Data</h3>
 <p>The <code>otp_dl_demo</code> function downloads the demonstation data and puts it in the correct structure.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw">otp_dl_demo</span>(path_data)</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">otp_dl_demo</span>(path_data)</a></code></pre></div>
 </div>
 </div>
 <div id="building-an-otp-graph" class="section level2">
 <h2>Building an OTP Graph</h2>
 <p>Now we can build the graph. This code will create a new file <code>Graph.obj</code> that will be saved in the location defined by <code>path_data</code>.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">log1 &lt;-<span class="st"> </span><span class="kw">otp_build_graph</span>(<span class="dt">otp =</span> path_otp, <span class="dt">dir =</span> path_data) </a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">log1 &lt;-<span class="st"> </span><span class="kw">otp_build_graph</span>(<span class="dt">otp =</span> path_otp, <span class="dt">dir =</span> path_data) </a></code></pre></div>
 <p>By default, R will assign OTP 2GB of memory to build the graph. For larger areas, you may need more memory and can use the <code>memory</code> argument to set the memory allocation in MB. For example, to allocate 10GB you would use.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">log1 &lt;-<span class="st"> </span><span class="kw">otp_build_graph</span>(<span class="dt">otp =</span> path_otp, <span class="dt">dir =</span> path_data, <span class="dt">memory =</span> <span class="dv">10240</span>) </a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1">log1 &lt;-<span class="st"> </span><span class="kw">otp_build_graph</span>(<span class="dt">otp =</span> path_otp, <span class="dt">dir =</span> path_data, <span class="dt">memory =</span> <span class="dv">10240</span>) </a></code></pre></div>
 <p>Note that you cannot allocate more memory than you have RAM, and if you use 32 Bit Java you cannot allocate more than 3GB. It is possible to run OTP in just 1GB of memory for very small areas (including the demo dataset).</p>
 </div>
 <div id="launch-otp-and-load-the-graph" class="section level2">
 <h2>Launch OTP and load the graph</h2>
 <p>The next step is to start up your OTP server, running the router called ‘default’. OTP will load the graph you created into memory and you will then be able to plan multi-modal routes using the web interface. Run the following command:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">log2 &lt;-<span class="st"> </span><span class="kw">otp_setup</span>(<span class="dt">otp =</span> path_otp, <span class="dt">dir =</span> path_data)</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">log2 &lt;-<span class="st"> </span><span class="kw">otp_setup</span>(<span class="dt">otp =</span> path_otp, <span class="dt">dir =</span> path_data)</a></code></pre></div>
 <p>OTP has a built-in web server called Grizzly which runs on port 8080 (http) and 8081 (https). If you have another application running on your computer that uses these ports then you will need to specify alternative ports using the <code>port</code> and <code>securePort</code> options, for example:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">log2 &lt;-<span class="st"> </span><span class="kw">otp_setup</span>(<span class="dt">otp =</span> path_otp, <span class="dt">dir =</span> path_data, <span class="dt">port =</span> <span class="dv">8801</span>, <span class="dt">securePort =</span> <span class="dv">8802</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">log2 &lt;-<span class="st"> </span><span class="kw">otp_setup</span>(<span class="dt">otp =</span> path_otp, <span class="dt">dir =</span> path_data, <span class="dt">port =</span> <span class="dv">8801</span>, <span class="dt">securePort =</span> <span class="dv">8802</span>)</a></code></pre></div>
 <p>It should only take a minute or two for OTP to load the graph and start the Grizzly server. If all has worked you should see the message: <code>OTP is ready to use</code> and R will open your web browser at the OTP.</p>
 <p>You can also access the web interface using the URL: <code>http://localhost:8080</code>. You can now zoom into the Isle of Wight area and request a route by setting an origin and a destination directly on the map (by right-clicking your mouse) and you can specify travel dates, times and modes using the ‘Trip Options’ window (see Figure ). You can change the background map from the layer stack icon at the top right.</p>
 <div class="figure" style="text-align: center">
@@ -373,33 +374,33 @@ OTP Web GUI
 <div id="connecting-to-the-otp-from-r" class="section level2">
 <h2>Connecting to the OTP from R</h2>
 <p>Now you have the OTP running on your computer you can let R connect to the OTP. <code>otp_connect()</code> creates an OTP connection object which will allow R to connect to the OTP.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">otpcon &lt;-<span class="st"> </span><span class="kw">otp_connect</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">otpcon &lt;-<span class="st"> </span><span class="kw">otp_connect</span>()</a></code></pre></div>
 <p>The connection is created and tested, a message will be returned saying if the connection exists or not.</p>
 <p>If you have not used the default settings, such as a different <code>port</code> you can specify those settings in <code>otp_connect()</code>.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">otpcon &lt;-<span class="st"> </span><span class="kw">otp_connect</span>(<span class="dt">hostname =</span>  <span class="st">&quot;localhost&quot;</span>,</a>
-<a class="sourceLine" id="cb11-2" data-line-number="2">                      <span class="dt">router =</span> <span class="st">&quot;default&quot;</span>,</a>
-<a class="sourceLine" id="cb11-3" data-line-number="3">                      <span class="dt">port =</span> <span class="dv">8801</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">otpcon &lt;-<span class="st"> </span><span class="kw">otp_connect</span>(<span class="dt">hostname =</span>  <span class="st">&quot;localhost&quot;</span>,</a>
+<a class="sourceLine" id="cb12-2" title="2">                      <span class="dt">router =</span> <span class="st">&quot;default&quot;</span>,</a>
+<a class="sourceLine" id="cb12-3" title="3">                      <span class="dt">port =</span> <span class="dv">8801</span>)</a></code></pre></div>
 <p>You can also use the <code>otp_connect()</code> function to make a connection to OTP on a remote server, for example <a href="https://digitransit.fi/en/">digitransit</a> run an OTP server for Finland. See their <a href="https://digitransit.fi/en/developers/">documentation</a> for more details. Digitransit use a non-standard URL structure for their API, so we provide the full URL directly to <code>otp_connect()</code>. See the <code>otp_connect()</code> help for more details.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">otpcon &lt;-<span class="st"> </span><span class="kw">otp_connect</span>(<span class="dt">url =</span> <span class="st">&quot;https://api.digitransit.fi/routing/v1/routers/hsl&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">otpcon &lt;-<span class="st"> </span><span class="kw">otp_connect</span>(<span class="dt">url =</span> <span class="st">&quot;https://api.digitransit.fi/routing/v1/routers/hsl&quot;</span>)</a></code></pre></div>
 </div>
 <div id="getting-a-route-from-the-otp" class="section level2">
 <h2>Getting a route from the OTP</h2>
 <p>Now we can use R to get a route from the OTP. OTP accepts pairs of longitude/latitude coordinates for a <code>fromPlace</code> (start of the journey) and <code>toPlace</code> (end of the journey).</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1">route &lt;-<span class="st"> </span><span class="kw">otp_plan</span>(otpcon, </a>
-<a class="sourceLine" id="cb13-2" data-line-number="2">                  <span class="dt">fromPlace =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">1.17502</span>, <span class="fl">50.64590</span>), </a>
-<a class="sourceLine" id="cb13-3" data-line-number="3">                  <span class="dt">toPlace =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">1.15339</span>, <span class="fl">50.72266</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">route &lt;-<span class="st"> </span><span class="kw">otp_plan</span>(otpcon, </a>
+<a class="sourceLine" id="cb14-2" title="2">                  <span class="dt">fromPlace =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">1.17502</span>, <span class="fl">50.64590</span>), </a>
+<a class="sourceLine" id="cb14-3" title="3">                  <span class="dt">toPlace =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">1.15339</span>, <span class="fl">50.72266</span>))</a></code></pre></div>
 <p>If you have the <code>tmap</code> package installed you can view the route using.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="co"># install.packages(&quot;tmap&quot;) # Only needed if you don't have tmap</span></a>
-<a class="sourceLine" id="cb14-2" data-line-number="2"><span class="kw">library</span>(tmap)              <span class="co"># Load the tmap package</span></a>
-<a class="sourceLine" id="cb14-3" data-line-number="3"><span class="kw">tmap_mode</span>(<span class="st">&quot;view&quot;</span>)          <span class="co"># Set tmap to interactive viewing</span></a>
-<a class="sourceLine" id="cb14-4" data-line-number="4"><span class="kw">qtm</span>(sf<span class="op">::</span><span class="kw">st_zm</span>(route))      <span class="co"># Plot the route on a map</span></a></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="co"># install.packages(&quot;tmap&quot;) # Only needed if you don&#39;t have tmap</span></a>
+<a class="sourceLine" id="cb15-2" title="2"><span class="kw">library</span>(tmap)              <span class="co"># Load the tmap package</span></a>
+<a class="sourceLine" id="cb15-3" title="3"><span class="kw">tmap_mode</span>(<span class="st">&quot;view&quot;</span>)          <span class="co"># Set tmap to interactive viewing</span></a>
+<a class="sourceLine" id="cb15-4" title="4"><span class="kw">qtm</span>(sf<span class="op">::</span><span class="kw">st_zm</span>(route))      <span class="co"># Plot the route on a map</span></a></code></pre></div>
 <p>Notice the use of <code>sf::st_zm(route)</code> this is because <code>tmap</code> does not currently support XYZ coordinates.</p>
 </div>
 <div id="stopping-the-otp" class="section level2">
 <h2>Stopping the OTP</h2>
 <p>As the OTP is running in Java it will continue to run after you close R.</p>
 <p>You can stop the OTP running using the command. <strong>NOTE: This will stop all running JAVA applications!</strong></p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">otp_stop</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw">otp_stop</span>()</a></code></pre></div>
 <p>Congratulations, you now have your own multi-modal router planner!</p>
 </div>
 <div id="building-your-own-otp-graph" class="section level2">
@@ -408,27 +409,27 @@ OTP Web GUI
 <p>An OTP graph specifies every location in the region covered and how to travel between them, and is compiled by OTP using OSM data for the street and path network (used for walk, bicycle and drive modes) and GTFS data for transit scheduling.</p>
 <p>Our first task is to create the folder and file structure expected by OTP. This is a base directory called <code>otp</code> which contains a sub-directory called <code>graphs</code>. Directories created under <code>graphs</code> are known as OTP routers and contain all the files required to build a graph. A single OTP instance can host several routers, for example covering different regions.</p>
 <p>The basic file structure is shown below.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="ex">/</span> otp                         # Your top folder for storing all OTP data</a>
-<a class="sourceLine" id="cb16-2" data-line-number="2">  <span class="ex">/graphs</span>                     </a>
-<a class="sourceLine" id="cb16-3" data-line-number="3">     <span class="ex">/default</span>                 # Subfolder with the name of the router</a>
-<a class="sourceLine" id="cb16-4" data-line-number="4">         <span class="ex">osm.pbf</span>              # Required OSM road map</a>
-<a class="sourceLine" id="cb16-5" data-line-number="5">         <span class="ex">router-config.json</span>   # Optional config file</a>
-<a class="sourceLine" id="cb16-6" data-line-number="6">         <span class="ex">build-config.json</span>    # Optional config file</a>
-<a class="sourceLine" id="cb16-7" data-line-number="7">         <span class="ex">gtfs.zip</span>             # Optional GTFS data</a>
-<a class="sourceLine" id="cb16-8" data-line-number="8">         <span class="ex">dem.tif</span>              # Optional Elevation data</a>
-<a class="sourceLine" id="cb16-9" data-line-number="9">         </a></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb17-1" title="1"><span class="ex">/</span> otp                         <span class="co"># Your top folder for storing all OTP data</span></a>
+<a class="sourceLine" id="cb17-2" title="2">  <span class="ex">/graphs</span>                     </a>
+<a class="sourceLine" id="cb17-3" title="3">     <span class="ex">/default</span>                 <span class="co"># Subfolder with the name of the router</span></a>
+<a class="sourceLine" id="cb17-4" title="4">         <span class="ex">osm.pbf</span>              <span class="co"># Required OSM road map</span></a>
+<a class="sourceLine" id="cb17-5" title="5">         <span class="ex">router-config.json</span>   <span class="co"># Optional config file</span></a>
+<a class="sourceLine" id="cb17-6" title="6">         <span class="ex">build-config.json</span>    <span class="co"># Optional config file</span></a>
+<a class="sourceLine" id="cb17-7" title="7">         <span class="ex">gtfs.zip</span>             <span class="co"># Optional GTFS data</span></a>
+<a class="sourceLine" id="cb17-8" title="8">         <span class="ex">dem.tif</span>              <span class="co"># Optional Elevation data</span></a>
+<a class="sourceLine" id="cb17-9" title="9">         </a></code></pre></div>
 <p><code>router-config.json</code> is read when the OTP server is started, while <code>build-config.json</code> is read during the graph building stage. For more information on the config files see the <a href="https://docs.ropensci.org/opentripplanner/articles/advanced_features.html">advanced features vignette</a>.</p>
 <div id="multiple-routers" class="section level3">
 <h3>Multiple Routers</h3>
 <p>OTP supports multiple routes by having them in separate folders. For example:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="ex">/</span> otp                        # Your top folder for storing all OTP data</a>
-<a class="sourceLine" id="cb17-2" data-line-number="2">  <span class="ex">/graphs</span>                     </a>
-<a class="sourceLine" id="cb17-3" data-line-number="3">     <span class="ex">/london</span>                 # router called london</a>
-<a class="sourceLine" id="cb17-4" data-line-number="4">         <span class="ex">osm.pbf</span>             # map of London</a>
-<a class="sourceLine" id="cb17-5" data-line-number="5">     <span class="ex">/manchester</span>             # router called manchester</a>
-<a class="sourceLine" id="cb17-6" data-line-number="6">         <span class="ex">osm.pbf</span>             # map of Manchester</a></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb18-1" title="1"><span class="ex">/</span> otp                        <span class="co"># Your top folder for storing all OTP data</span></a>
+<a class="sourceLine" id="cb18-2" title="2">  <span class="ex">/graphs</span>                     </a>
+<a class="sourceLine" id="cb18-3" title="3">     <span class="ex">/london</span>                 <span class="co"># router called london</span></a>
+<a class="sourceLine" id="cb18-4" title="4">         <span class="ex">osm.pbf</span>             <span class="co"># map of London</span></a>
+<a class="sourceLine" id="cb18-5" title="5">     <span class="ex">/manchester</span>             <span class="co"># router called manchester</span></a>
+<a class="sourceLine" id="cb18-6" title="6">         <span class="ex">osm.pbf</span>             <span class="co"># map of Manchester</span></a></code></pre></div>
 <p>Having multiple routers may be useful to support different regions, or different scenarios e.g. past, present, future.</p>
-<p>Each router requires its own graph via <code>otp_build_graph()</code> but only one version of the OTP jar files is needed (i.e. <code>otp_dl_jar()</code>) Each route must be started via <code>otp_setup()</code> before use. While it is technically possible to run multiple routers simultaneously it is not recommended for performance reasons.</p>
+<p>Each router requires its own graph via <code>otp_build_graph()</code> but only one version of the OTP jar files is needed (i.e. <code>otp_dl_jar()</code>) Each route must be started via <code>otp_setup()</code> before use. While it is technically possible to run multiple routers simultaneously it is not recommended for performance reasons.</p>
 </div>
 <div id="getting-data-for-otp" class="section level3">
 <h3>Getting Data for OTP</h3>

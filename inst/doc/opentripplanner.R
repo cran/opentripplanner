@@ -2,6 +2,10 @@
 #  install.packages("opentripplanner") # Install Package
 #  library(opentripplanner)            # Load Package
 
+## ----installGitHub, eval=FALSE------------------------------------------------
+#  remotes::install_github("ropensci/opentripplanner") # Install Package
+#  library(opentripplanner)                            # Load Package
+
 ## ---- eval=FALSE--------------------------------------------------------------
 #  path_data <- file.path(tempdir(), "OTP")
 #  dir.create(path_data)
