@@ -18,20 +18,22 @@ otp_plan(
   routeOptions = NULL,
   full_elevation = FALSE,
   get_geometry = TRUE,
-  ncores = 1
+  ncores = 1,
+  timezone = otpcon$timezone
 )
 }
 \arguments{
 \item{otpcon}{OTP connection object produced by otp_connect()}
 
 \item{fromPlace}{Numeric vector, Longitude/Latitude pair,
-    e.g. `c(-0.134649,51.529258)`,
-or 2 column matrix of Longitude/Latitude pairs, or sf
-    data frame of POINTS}
+e.g. `c(-0.134649,51.529258)`, or 2 column matrix of
+Longitude/Latitude pairs, or sf data frame of POINTS
+with CRS 4326}
 
 \item{toPlace}{Numeric vector, Longitude/Latitude pair,
 e.g. `c(-0.088780,51.506383)`, or 2 column matrix of
-Longitude/Latitude pairs, or sf data frame of POINTS}
+Longitude/Latitude pairs, or sf data frame of POINTS
+with CRS 4326}
 
 \item{fromID}{character vector same length as fromPlace}
 
@@ -63,6 +65,9 @@ default TRUE, see details}
 
 \item{ncores}{Numeric, number of cores to use when batch processing,
 default 1, see details}
+
+\item{timezone}{Character, what timezone to use, see as.POSIXct, default is
+local timezone}
 }
 \value{
 Returns an SF data frame of LINESTRINGs

@@ -36,7 +36,7 @@
 knitr::include_graphics("images/otpwebgui.jpg")
 
 ## ---- eval = FALSE------------------------------------------------------------
-#  otpcon <- otp_connect()
+#  otpcon <- otp_connect(timezone = "Europe/London")
 
 ## ---- eval = FALSE------------------------------------------------------------
 #  otpcon <- otp_connect(hostname =  "localhost",

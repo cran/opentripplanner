@@ -8,7 +8,7 @@
 #  # Build Graph and start OTP
 #  log1 <- otp_build_graph(otp = path_otp, dir = path_data)
 #  log2 <- otp_setup(otp = path_otp, dir = path_data)
-#  otpcon <- otp_connect()
+#  otpcon <- otp_connect(timezone = "Europe/London")
 
 ## ---- eval=FALSE--------------------------------------------------------------
 #  lsoa <- sf::st_read("https://github.com/ropensci/opentripplanner/releases/download/0.1/centroids.gpkg",
@@ -40,8 +40,8 @@ knitr::include_graphics("images/routes_to_ferry.jpg")
 #  routes <- routes[,c("fromPlace","toPlace","duration")]
 #  # Use the tidyr package to go from long to wide format
 #  routes_matrix <- tidyr::pivot_wider(routes,
-#                                 key = "toPlace",
-#                                 value = "duration")
+#                                 names_from = "toPlace",
+#                                 values_from = "duration")
 
 ## ---- echo=FALSE, fig.align='center', fig.cap="\\label{fig:multicore} Multicore performance improvements"----
 knitr::include_graphics("images/multicore.jpeg")

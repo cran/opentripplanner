@@ -1,9 +1,16 @@
+# opentripplanner 0.2.2.0
+
+* Changes to support `dplyr 1.0.0`, package now needs `vctrs 0.3.1`
+* Added timezone support to `otp_connect`, `otp_plan`, and `otp_isochrone` fixing issue #54, see docs for details.
+* Added `quiet` argument to `otp_dl_jar` and `otp_dl_demo`
+* Fixed error in advanced features vignette, issue #57
+
 # opentripplanner 0.2.1.0
 
 * Batch isochrones support added
-* Fix bug in correct_distances() when input is of length <= 2 or the distances never decrease
-* Fix bug in polyline2linestring() when elevation is length <= 2
-* New input artgument to `otp_plan()` and otp_isochrone routingOptions this allows support
+* Fix bug in `correct_distances()` when input is of length <= 2 or the distances never decrease
+* Fix bug in `polyline2linestring()` when elevation is length <= 2
+* New input argument to `otp_plan()` and otp_isochrone routingOptions this allows support
     for many more routing options to be set. Arguments walkReluctance, transferPenalty, and
     minTransferTime have been removed and replaced with routingOptions.
 * New functions `otp_routing_options()`, `otp_validate_routing_options()`, `otp_check_java()`
@@ -27,3 +34,7 @@
 # opentripplanner 0.2.0.3
 
 * First CRAN release
+
+# opentripplanner 0.2.0.0
+
+* Release peer-reviewed by ROpenSci

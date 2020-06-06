@@ -10,7 +10,8 @@ otp_connect(
   url = NULL,
   port = 8080,
   ssl = FALSE,
-  check = TRUE
+  check = TRUE,
+  timezone = Sys.timezone()
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ default is FALSE.}
 
 \item{check}{Logical. If TRUE connection object is only returned if OTP
 instance and router are confirmed reachable. Optional, default is TRUE.}
+
+\item{timezone}{Character, timezone, defaults to local timezone}
 }
 \value{
 Returns an S3 object of class otpconnect. If \code{check} is TRUE

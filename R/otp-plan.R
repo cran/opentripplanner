@@ -7,12 +7,13 @@
 #'
 #' @param otpcon OTP connection object produced by otp_connect()
 #' @param fromPlace Numeric vector, Longitude/Latitude pair,
-#'     e.g. `c(-0.134649,51.529258)`,
-#' or 2 column matrix of Longitude/Latitude pairs, or sf
-#'     data frame of POINTS
+#'     e.g. `c(-0.134649,51.529258)`, or 2 column matrix of
+#'     Longitude/Latitude pairs, or sf data frame of POINTS
+#'     with CRS 4326
 #' @param toPlace Numeric vector, Longitude/Latitude pair,
 #'     e.g. `c(-0.088780,51.506383)`, or 2 column matrix of
 #'     Longitude/Latitude pairs, or sf data frame of POINTS
+#'     with CRS 4326
 #' @param fromID character vector same length as fromPlace
 #' @param toID character vector same length as toPlace
 #' @param mode character vector of one or more modes of travel valid values
@@ -33,6 +34,8 @@
 #'     default 1, see details
 #' @param get_geometry Logical, should the route geometry be returned,
 #'     default TRUE, see details
+#' @param timezone Character, what timezone to use, see as.POSIXct, default is
+#'   local timezone
 #'
 #' @export
 #' @family routing
@@ -98,8 +101,17 @@ otp_plan <- function(otpcon = NA,
                      routeOptions = NULL,
                      full_elevation = FALSE,
                      get_geometry = TRUE,
-                     ncores = 1) {
+                     ncores = 1,
+                     timezone = otpcon$timezone) {
   # Check Valid Inputs
+
+  # Back compatability with 0.2.1
+  if(is.null(timezone)){
+    warning("otpcon is missing the timezone variaible, assuming local timezone")
+    timezone <- Sys.timezone()
+  }
+  checkmate::assert_subset(timezone, choices = OlsonNames(tzdir = NULL))
+
   checkmate::assert_class(otpcon, "otpconnect")
   mode <- toupper(mode)
   checkmate::assert_subset(mode,
@@ -111,16 +123,15 @@ otp_plan <- function(otpcon = NA,
   )
   mode <- paste(mode, collapse = ",")
   checkmate::assert_posixct(date_time)
-  date <- format(date_time, "%m-%d-%Y")
-  time <- tolower(format(date_time, "%I:%M%p"))
+  date <- format(date_time, "%m-%d-%Y", tz = timezone)
+  time <- tolower(format(date_time, "%I:%M%p", tz = timezone))
   checkmate::assert_numeric(maxWalkDistance, lower = 0, len = 1)
-  #checkmate::assert_numeric(walkReluctance, lower = 0, len = 1)
-  #checkmate::assert_numeric(transferPenalty, lower = 0, len = 1)
   checkmate::assert_numeric(numItineraries, lower = 1, len = 1)
   checkmate::assert_character(fromID, null.ok = TRUE)
   checkmate::assert_character(toID, null.ok = TRUE)
   checkmate::assert_logical(arriveBy)
   arriveBy <- tolower(arriveBy)
+
 
   # Check Route Options
   if(!is.null(routeOptions)){
@@ -195,6 +206,7 @@ otp_plan <- function(otpcon = NA,
       routeOptions = routeOptions,
       full_elevation = full_elevation,
       get_geometry = get_geometry,
+      timezone = timezone,
       cl = cl
     )
     parallel::stopCluster(cl)
@@ -215,7 +227,8 @@ otp_plan <- function(otpcon = NA,
       numItineraries = numItineraries,
       routeOptions = routeOptions,
       full_elevation = full_elevation,
-      get_geometry = get_geometry
+      get_geometry = get_geometry,
+      timezone = timezone
     )
   }
 
@@ -326,8 +339,10 @@ otp_clean_input <- function(imp, imp_name) {
       max.cols = 2,
       null.ok = FALSE
     )
-    checkmate::assert_numeric(imp[, 1], lower = -180, upper = 180)
-    checkmate::assert_numeric(imp[, 2], lower = -90, upper = 90)
+    checkmate::assert_numeric(imp[, 1], lower = -180, upper = 180,
+                              any.missing = FALSE, .var.name = paste0(imp_name," Longitude"))
+    checkmate::assert_numeric(imp[, 2], lower = -90, upper = 90,
+                              any.missing = FALSE, .var.name = paste0(imp_name," Latitude"))
     imp[] <- imp[, 2:1] # Switch round lng/lat to lat/lng for OTP
     return(imp)
   }
@@ -356,6 +371,7 @@ otp_clean_input <- function(imp, imp_name) {
 #' @param numItineraries The maximum number of possible itineraries to return
 #' @param full_elevation Logical, should the full elevation profile be returned, default FALSE
 #' @param get_geometry logical, should geometry be returned
+#' @param timezone timezone to use
 #' @family internal
 #' @details
 #' This function returns a SF data.frame with one row for each leg of the journey
@@ -377,7 +393,8 @@ otp_plan_internal <- function(otpcon = NA,
                               numItineraries = 3,
                               routeOptions = NULL,
                               full_elevation = FALSE,
-                              get_geometry = TRUE) {
+                              get_geometry = TRUE,
+                              timezone = "") {
 
 
   # Construct URL
@@ -417,7 +434,7 @@ otp_plan_internal <- function(otpcon = NA,
 
   # Check for errors - if no error object, continue to process content
   if (is.null(asjson$error$id)) {
-    response <- otp_json2sf(asjson, full_elevation, get_geometry)
+    response <- otp_json2sf(asjson, full_elevation, get_geometry, timezone)
     # Add Ids
     if (is.null(fromID)) {
       response$fromPlace <- fromPlace
@@ -448,10 +465,12 @@ otp_plan_internal <- function(otpcon = NA,
 #' @param obj Object from the OTP API to process
 #' @param full_elevation logical should the full elevation profile be returned (if available)
 #' @param get_geometry logical, should geometry be returned
+#' @param timezone character, which timezone to use, default "" means local time
 #' @family internal
 #' @noRd
 
-otp_json2sf <- function(obj, full_elevation = FALSE, get_geometry = TRUE) {
+otp_json2sf <- function(obj, full_elevation = FALSE, get_geometry = TRUE,
+                        timezone = "") {
   requestParameters <- obj$requestParameters
   plan <- obj$plan
   debugOutput <- obj$debugOutput
@@ -459,10 +478,10 @@ otp_json2sf <- function(obj, full_elevation = FALSE, get_geometry = TRUE) {
   itineraries <- plan$itineraries
 
   itineraries$startTime <- as.POSIXct(itineraries$startTime / 1000,
-    origin = "1970-01-01", tz = "GMT"
+    origin = "1970-01-01", tz = timezone
   )
   itineraries$endTime <- as.POSIXct(itineraries$endTime / 1000,
-    origin = "1970-01-01", tz = "GMT"
+    origin = "1970-01-01", tz = timezone
   )
 
 
@@ -546,10 +565,10 @@ otp_json2sf <- function(obj, full_elevation = FALSE, get_geometry = TRUE) {
   }
 
   legs$startTime <- as.POSIXct(legs$startTime / 1000,
-    origin = "1970-01-01", tz = "GMT"
+    origin = "1970-01-01", tz = timezone
   )
   legs$endTime <- as.POSIXct(legs$endTime / 1000,
-    origin = "1970-01-01", tz = "GMT"
+    origin = "1970-01-01", tz = timezone
   )
 
   itineraries$legs <- NULL
@@ -572,6 +591,9 @@ otp_json2sf <- function(obj, full_elevation = FALSE, get_geometry = TRUE) {
 
 
   itineraries <- itineraries[legs$route_option, ]
+  names(legs)[names(legs) == "startTime"] <- "leg_startTime"
+  names(legs)[names(legs) == "endTime"] <- "leg_endTime"
+  names(legs)[names(legs) == "duration"] <- "leg_duration"
   itineraries <- dplyr::bind_cols(itineraries, legs)
 
   if (get_geometry) {

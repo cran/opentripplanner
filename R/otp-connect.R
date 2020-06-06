@@ -14,6 +14,7 @@
 #'     default is FALSE.
 #' @param check Logical. If TRUE connection object is only returned if OTP
 #'     instance and router are confirmed reachable. Optional, default is TRUE.
+#' @param timezone Character, timezone, defaults to local timezone
 #' @return Returns an S3 object of class otpconnect. If \code{check} is TRUE
 #'     and the router is not reachable the object is not returned.
 #' @family connect
@@ -51,13 +52,15 @@ otp_connect <- function(hostname = "localhost",
                         url = NULL,
                         port = 8080,
                         ssl = FALSE,
-                        check = TRUE) {
+                        check = TRUE,
+                        timezone = Sys.timezone()) {
   # argument checks
 
   coll <- checkmate::makeAssertCollection()
   checkmate::assert_string(hostname, add = coll)
   checkmate::assert_string(router, add = coll)
   checkmate::assert_string(url, add = coll, null.ok = TRUE)
+  checkmate::assert_string(timezone, add = coll)
   checkmate::assert_int(port, lower = 1, add = coll)
   checkmate::assert_logical(ssl, add = coll)
   checkmate::assert_logical(check, add = coll)
@@ -68,7 +71,8 @@ otp_connect <- function(hostname = "localhost",
     router = router,
     url = url,
     port = port,
-    ssl = ssl
+    ssl = ssl,
+    timezone = timezone
   )
 
   # Set the name for the class
