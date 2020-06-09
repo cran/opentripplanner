@@ -1,3 +1,9 @@
+# opentripplanner 0.2.3.0
+
+* Added `distance_balancing` argument to `otp_plan` gives a small perfomance boost to multicore routing
+* Added `get_elevation` argument to `otp_plan` default TRUE, when FALSE returns XY coordinates rather than XYZ coordiantes and gives a 4% performance boost.
+* Removed helper code for `dplyr::bind_rows` as no longer required for `dplyr 1.0.0`
+
 # opentripplanner 0.2.2.0
 
 * Changes to support `dplyr 1.0.0`, package now needs `vctrs 0.3.1`
