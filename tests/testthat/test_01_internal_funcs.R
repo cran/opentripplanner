@@ -43,25 +43,39 @@ test_that("test otp_clean_input", {
 })
 
 test_that("test otp_json2sf", {
-
-  r1 <- otp_json2sf(obj = json_example_drive)
+  r1 <- RcppSimdJson::fparse(json_example_drive,
+    query = "/plan/itineraries"
+  )
+  r1 <- otp_json2sf(r1)
   expect_true("data.frame" %in% class(r1))
   expect_true(nrow(r1) == 1)
   expect_true("sf" %in% class(r1))
 
-  r2 <- otp_json2sf(obj = json_example_drive, get_geometry = FALSE)
+  r2 <- RcppSimdJson::fparse(json_example_drive,
+    query = "/plan/itineraries"
+  )
+  r2 <- otp_json2sf(r2, get_geometry = FALSE)
   expect_true("data.frame" %in% class(r2))
   expect_true(nrow(r2) == 1)
   expect_false("sf" %in% class(r2))
 
-  r3 <- otp_json2sf(obj = json_example_drive, get_geometry = TRUE, full_elevation = TRUE)
+  r3 <- RcppSimdJson::fparse(json_example_drive,
+    query = "/plan/itineraries"
+  )
+  r3 <- otp_json2sf(r3,
+    get_geometry = TRUE,
+    full_elevation = TRUE
+  )
   expect_true("data.frame" %in% class(r3))
   expect_true(nrow(r3) == 1)
   expect_true("sf" %in% class(r3))
   expect_true("elevation" %in% names(r3))
   expect_true(class(r3$elevation) == "list")
 
-  r4 <- otp_json2sf(obj = json_example_transit)
+  r4 <- RcppSimdJson::fparse(json_example_transit,
+    query = "/plan/itineraries"
+  )
+  r4 <- otp_json2sf(r4)
   expect_true("data.frame" %in% class(r4))
   expect_true(nrow(r4) == 9)
   expect_true("sf" %in% class(r4))
@@ -127,7 +141,6 @@ test_that("test polyline2linestring", {
 test_that("test otp_check_java", {
   r1 <- otp_check_java()
   expect_true(class(r1) == "logical")
-
 })
 
 
@@ -149,13 +162,14 @@ path_otp <- file.path(tempdir(), "otp2", "otp.jar")
 
 
 test_that("test otp_checks without graph, missing files", {
-  expect_error(otp_checks(
-    otp = path_otp,
-    dir = path_data,
-    router = "default",
-    graph = FALSE
-  ),
-  "does not exist"
+  expect_error(
+    otp_checks(
+      otp = path_otp,
+      dir = path_data,
+      router = "default",
+      graph = FALSE
+    ),
+    "does not exist"
   )
 })
 
@@ -173,13 +187,14 @@ file.create(path_otp)
 # })
 
 test_that("test otp_checks with graph, missing files", {
-  expect_error(otp_checks(
-    otp = path_otp,
-    dir = path_data,
-    router = "default",
-    graph = TRUE
-  ),
-  "File does not exist"
+  expect_error(
+    otp_checks(
+      otp = path_otp,
+      dir = path_data,
+      router = "default",
+      graph = TRUE
+    ),
+    "File does not exist"
   )
 })
 

@@ -84,34 +84,34 @@ otp_isochrone <- function(otpcon = NA,
     })
     pbapply::pboptions(use_lb = TRUE)
     results <- pbapply::pblapply(seq(1, nrow(fromPlace)),
-                                 otp_get_isochrone_results,
-                                 otpcon = otpcon,
-                                 fromPlace = fromPlace,
-                                 fromID = fromID,
-                                 mode = mode,
-                                 date = date,
-                                 time = time,
-                                 arriveBy = arriveBy,
-                                 maxWalkDistance = maxWalkDistance,
-                                 routingOptions = routingOptions,
-                                 cutoffSec = cutoffSec,
-                                 cl = cl
+      otp_get_isochrone_results,
+      otpcon = otpcon,
+      fromPlace = fromPlace,
+      fromID = fromID,
+      mode = mode,
+      date = date,
+      time = time,
+      arriveBy = arriveBy,
+      maxWalkDistance = maxWalkDistance,
+      routingOptions = routingOptions,
+      cutoffSec = cutoffSec,
+      cl = cl
     )
     parallel::stopCluster(cl)
     rm(cl)
   } else {
     results <- pbapply::pblapply(seq(1, nrow(fromPlace)),
-                                 otp_get_isochrone_results,
-                                 otpcon = otpcon,
-                                 fromPlace = fromPlace,
-                                 fromID = fromID,
-                                 mode = mode,
-                                 date = date,
-                                 time = time,
-                                 arriveBy = arriveBy,
-                                 maxWalkDistance = maxWalkDistance,
-                                 routingOptions = routingOptions,
-                                 cutoffSec = cutoffSec
+      otp_get_isochrone_results,
+      otpcon = otpcon,
+      fromPlace = fromPlace,
+      fromID = fromID,
+      mode = mode,
+      date = date,
+      time = time,
+      arriveBy = arriveBy,
+      maxWalkDistance = maxWalkDistance,
+      routingOptions = routingOptions,
+      cutoffSec = cutoffSec
     )
   }
 
@@ -119,7 +119,7 @@ otp_isochrone <- function(otpcon = NA,
 
   results_class <- unlist(lapply(results, function(x) {
     "data.frame" %in% class(x)
-  }))
+  }), use.names = FALSE)
   if (all(results_class)) {
     results_routes <- results[results_class]
     results_errors <- NA
@@ -133,27 +133,24 @@ otp_isochrone <- function(otpcon = NA,
 
   # Bind together
   if (!all(class(results_routes) == "logical")) {
-    results_routes <- dplyr::bind_rows(results_routes)
-    # if (any(unlist(lapply(results, function(x) {
-    #   "sf" %in% class(x)
-    # })))) {
-    #   suppressWarnings(results_routes <- dplyr::bind_rows(results_routes))
-    #   results_routes <- as.data.frame(results_routes)
-    #   results_routes$geometry <- sf::st_sfc(results_routes$geometry)
-    #   results_routes <- sf::st_sf(results_routes)
-    #   sf::st_crs(results_routes) <- 4326
-    # } else {
-    #   results_routes <- dplyr::bind_rows(results_routes)
-    # }
+    if (any(unlist(lapply(results, function(x) {
+      "sf" %in% class(x)
+    }), use.names = FALSE))) {
+      results_routes <- data.table::rbindlist(results_routes)
+      results_routes <- as.data.frame(results_routes)
+      results_routes$geometry <- sf::st_sfc(results_routes$geometry)
+      results_routes <- sf::st_sf(results_routes, crs = 4326)
+    } else {
+      results_routes <- data.table::rbindlist(results_routes)
+    }
   }
 
 
   if (!all(class(results_errors) == "logical")) {
-    results_errors <- unlist(results_errors)
+    results_errors <- unlist(results_errors, use.names = FALSE)
     warning(results_errors)
   }
   return(results_routes)
-
 }
 
 #' Get isochrone results
@@ -199,15 +196,15 @@ otp_get_isochrone_results <- function(x, otpcon, fromPlace, fromID, ...) {
 #' @noRd
 
 otp_isochrone_internal <- function(otpcon = NA,
-                           fromPlace = NA,
-                           fromID = NULL,
-                           mode = NULL,
-                           date = NULL,
-                           time = NULL,
-                           arriveBy = NULL,
-                           maxWalkDistance = NULL,
-                           routingOptions = NULL,
-                           cutoffSec = NULL) {
+                                   fromPlace = NA,
+                                   fromID = NULL,
+                                   mode = NULL,
+                                   date = NULL,
+                                   time = NULL,
+                                   arriveBy = NULL,
+                                   maxWalkDistance = NULL,
+                                   routingOptions = NULL,
+                                   cutoffSec = NULL) {
 
   # Construct URL
   routerUrl <- make_url(otpcon)
@@ -228,29 +225,29 @@ otp_isochrone_internal <- function(otpcon = NA,
   names(cutoffSec) <- rep("cutoffSec", length(cutoffSec))
   query <- c(query, cutoffSec)
 
-  if(!is.null(routingOptions)){
+  if (!is.null(routingOptions)) {
     query <- c(query, routingOptions)
   }
 
-  req <- httr::GET(
-    routerUrl,
-    query = query
-  )
-
   # convert response content into text
-  text <- httr::content(req, as = "text", encoding = "UTF-8")
+  url <- build_url(routerUrl, query)
+  h <- curl::new_handle()
+  h <- curl::handle_setheaders(h,"Accept" = "application/json")
+  text <- curl::curl_fetch_memory(url, h)
+  text <- text$content
+  text <- rawToChar(text)
 
   if (nchar(text) < 200) {
-    return(paste0("Failed to get isochrone with error: ",text))
+    return(paste0("Failed to get isochrone with error: ", text))
   } else {
     # parse to sf
     response <- sf::st_read(text, quiet = TRUE)
     response$id <- seq(1, nrow(response))
-    if(any(!sf::st_is_valid(response))){
+    if (any(!sf::st_is_valid(response))) {
       suppressMessages(suppressWarnings(response <- sf::st_buffer(response, 0)))
     }
 
-    if(!is.null(fromID)){
+    if (!is.null(fromID)) {
       response$fromPlace <- fromID
     } else {
       response$fromPlace <- fromPlace
@@ -259,5 +256,3 @@ otp_isochrone_internal <- function(otpcon = NA,
     return(response)
   }
 }
-
-

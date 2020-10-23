@@ -51,6 +51,7 @@ knitr::include_graphics("images/multicore.jpeg")
 #                      fromPlace = c(-1.18968, 50.60096),
 #                      toPlace = c(-1.19105, 50.60439),
 #                      mode = "WALK",
+#                      get_elevation = TRUE
 #                      full_elevation = TRUE)
 
 ## ---- eval=FALSE--------------------------------------------------------------

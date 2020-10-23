@@ -32,7 +32,7 @@
 #'   local timezone
 #' @param distance_balance Logical, use distance balancing, default false, see
 #'   details
-#' @param get_elevation Logical, default TRUE, if true XYZ coordinates returned
+#' @param get_elevation Logical, default FALSE, if true XYZ coordinates returned
 #'   else XY coordinates returned.
 #'
 #' @export
@@ -56,9 +56,10 @@
 #'
 #'   When using multicore routing each task does not take the same amount of
 #'   time. This can result in wasted time between batches. Distance Balancing
-#'   sorts the routing by the euclidean distance between fromPlace and toPlace,
-#'   this offers a small performance improvement of around five percent. As the
-#'   original order of the inputs is lost so fromID and toID must be provided.
+#'   sorts the routing by the euclidean distance between fromPlace and toPlace
+#'   before routing. This offers a small performance improvement of around five
+#'   percent. As the original order of the inputs is lost fromID and toID must
+#'   be provided.
 #'
 #'   ## Elevation
 #'
@@ -109,11 +110,11 @@ otp_plan <- function(otpcon = NA,
                      ncores = 1,
                      timezone = otpcon$timezone,
                      distance_balance = FALSE,
-                     get_elevation = TRUE) {
+                     get_elevation = FALSE) {
   # Check Valid Inputs
 
-  # Back compatability with 0.2.1
-  if(is.null(timezone)){
+  # Back compatibility with 0.2.1
+  if (is.null(timezone)) {
     warning("otpcon is missing the timezone variaible, assuming local timezone")
     timezone <- Sys.timezone()
   }
@@ -141,18 +142,18 @@ otp_plan <- function(otpcon = NA,
   checkmate::assert_logical(distance_balance, len = 1, null.ok = FALSE)
   checkmate::assert_logical(get_elevation, len = 1, null.ok = FALSE)
 
-  if(distance_balance & (ncores > 1)){
-    if(is.null(fromID)){
+  if (distance_balance & (ncores > 1)) {
+    if (is.null(fromID)) {
       stop("Distance balancing changes the order of the output, so fromID must not be NULL")
     }
-    if(is.null(toID)){
+    if (is.null(toID)) {
       stop("Distance balancing changes the order of the output, so toID must not be NULL")
     }
   }
 
 
   # Check Route Options
-  if(!is.null(routeOptions)){
+  if (!is.null(routeOptions)) {
     routeOptions <- otp_validate_routing_options(routeOptions)
   }
 
@@ -193,13 +194,22 @@ otp_plan <- function(otpcon = NA,
     }
   }
 
-  if(distance_balance & (ncores > 1)){
+  if (distance_balance & (ncores > 1)) {
     dists <- geodist::geodist(fromPlace, toPlace, paired = TRUE)
+
+    # Remove 0m pairs as OTP will fail on them anyway
+    dists_0 <- dists != 0
+    fromPlace <- fromPlace[dists_0, ]
+    toPlace <- toPlace[dists_0, ]
+    fromID <- fromID[dists_0]
+    toID <- toID[dists_0]
+    dists <- dists[dists_0]
+
     dists <- order(dists, decreasing = TRUE)
     fromPlace <- fromPlace[dists, ]
     toPlace <- toPlace[dists, ]
-    fromID <- fromID[dists, ]
-    toID <- toID[dists, ]
+    fromID <- fromID[dists]
+    toID <- toID[dists]
   }
 
   if (ncores > 1) {
@@ -261,7 +271,7 @@ otp_plan <- function(otpcon = NA,
 
   results_class <- unlist(lapply(results, function(x) {
     "data.frame" %in% class(x)
-  }))
+  }), use.names = FALSE)
   if (all(results_class)) {
     results_routes <- results[results_class]
     results_errors <- NA
@@ -275,23 +285,26 @@ otp_plan <- function(otpcon = NA,
 
   # Bind together
   if (!all(class(results_routes) == "logical")) {
-    results_routes <- dplyr::bind_rows(results_routes)
-    # if (any(unlist(lapply(results, function(x) {
-    #   "sf" %in% class(x)
-    # })))) {
-    #   suppressWarnings(results_routes <- dplyr::bind_rows(results_routes))
-    #   results_routes <- as.data.frame(results_routes)
-    #   results_routes$geometry <- sf::st_sfc(results_routes$geometry)
-    #   results_routes <- sf::st_sf(results_routes)
-    #   sf::st_crs(results_routes) <- 4326
-    # } else {
-    #   results_routes <- dplyr::bind_rows(results_routes)
-    # }
+    if (any(unlist(lapply(results, function(x) {
+      "sf" %in% class(x)
+    }), use.names = FALSE))) {
+      results_routes <- data.table::rbindlist(results_routes, fill = TRUE)
+      results_routes <- as.data.frame(results_routes)
+      results_routes <- df2sf(results_routes)
+      # fix for bbox error from data.table
+      results_routes <- results_routes[seq_len(nrow(results_routes)), ]
+      colnms <- names(results_routes)
+      colnms <- colnms[!colnms %in% c("fromPlace", "toPlace", "geometry")]
+      results_routes <- results_routes[c("fromPlace", "toPlace", colnms, "geometry")]
+    } else {
+      results_routes <- data.table::rbindlist(results_routes, fill = TRUE)
+    }
   }
 
 
   if (!all(class(results_errors) == "logical")) {
-    results_errors <- unlist(results_errors)
+    results_errors <- unlist(results_errors, use.names = FALSE)
+    results_errors <- paste0(results_errors, "\n")
     warning(results_errors)
   }
   return(results_routes)
@@ -321,10 +334,6 @@ otp_get_results <- function(x, otpcon, fromPlace, toPlace, fromID, toID,
     ...
   )
 
-  # if ("data.frame" %in% class(res)) {
-  #   res$fromPlace <- paste(fromPlace[x, ], collapse = ",")
-  #   res$toPlace <- paste(toPlace[x, ], collapse = ",")
-  # }
   return(res)
 }
 
@@ -356,7 +365,7 @@ otp_clean_input <- function(imp, imp_name) {
   }
 
   # For matrix inputs
-  #if (all(class(imp) == "matrix")) { # to pass CRAN checks
+  # if (all(class(imp) == "matrix")) { # to pass CRAN checks
   if ("matrix" %in% class(imp)) {
     checkmate::assert_matrix(imp,
       any.missing = FALSE,
@@ -365,11 +374,16 @@ otp_clean_input <- function(imp, imp_name) {
       max.cols = 2,
       null.ok = FALSE
     )
-    checkmate::assert_numeric(imp[, 1], lower = -180, upper = 180,
-                              any.missing = FALSE, .var.name = paste0(imp_name," Longitude"))
-    checkmate::assert_numeric(imp[, 2], lower = -90, upper = 90,
-                              any.missing = FALSE, .var.name = paste0(imp_name," Latitude"))
+    checkmate::assert_numeric(imp[, 1],
+      lower = -180, upper = 180,
+      any.missing = FALSE, .var.name = paste0(imp_name, " Longitude")
+    )
+    checkmate::assert_numeric(imp[, 2],
+      lower = -90, upper = 90,
+      any.missing = FALSE, .var.name = paste0(imp_name, " Latitude")
+    )
     imp[] <- imp[, 2:1] # Switch round lng/lat to lat/lng for OTP
+    colnames(imp) <- c("lat", "lon")
     return(imp)
   }
   # Otherwise stop as invalid input
@@ -422,7 +436,7 @@ otp_plan_internal <- function(otpcon = NA,
                               full_elevation = FALSE,
                               get_geometry = TRUE,
                               timezone = "",
-                              get_elevation = TRUE) {
+                              get_elevation = FALSE) {
 
 
   # Construct URL
@@ -446,22 +460,19 @@ otp_plan_internal <- function(otpcon = NA,
     numItineraries = numItineraries
   )
 
-  if(!is.null(routeOptions)){
+  if (!is.null(routeOptions)) {
     query <- c(query, routeOptions)
   }
 
-  req <- httr::GET(
-    routerUrl,
-    query = query
+  url <- build_url(routerUrl, query)
+  text <- curl::curl_fetch_memory(url)
+  text <- rawToChar(text$content)
+  asjson <- try(RcppSimdJson::fparse(text, query = "/plan/itineraries"),
+    silent = TRUE
   )
 
-  # convert response content into text
-  text <- httr::content(req, as = "text", encoding = "UTF-8")
-  # parse text to json
-  asjson <- jsonlite::fromJSON(text)
-
   # Check for errors - if no error object, continue to process content
-  if (is.null(asjson$error$id)) {
+  if (!"try-error" %in% class(asjson)) {
     response <- otp_json2sf(asjson, full_elevation, get_geometry, timezone, get_elevation)
     # Add Ids
     if (is.null(fromID)) {
@@ -476,6 +487,7 @@ otp_plan_internal <- function(otpcon = NA,
     }
     return(response)
   } else {
+    asjson <- RcppSimdJson::fparse(text)
     # there is an error - return the error code and message
     response <- paste0(
       "Error: ", asjson$error$id,
@@ -490,125 +502,41 @@ otp_plan_internal <- function(otpcon = NA,
 
 #' Convert output from OpenTripPlanner into sf object
 #'
-#' @param obj Object from the OTP API to process
+#' @param itineraries Object from the OTP API to process
 #' @param full_elevation logical should the full elevation profile be returned (if available)
 #' @param get_geometry logical, should geometry be returned
 #' @param timezone character, which timezone to use, default "" means local time
-#' @param get_elevation, logical, shoudl xyz coordinate be returned
+#' @param get_elevation, logical, should xyz coordinate be returned
 #' @family internal
 #' @noRd
 
-otp_json2sf <- function(obj,
-                        full_elevation = FALSE,
-                        get_geometry = TRUE,
-                        timezone = "",
-                        get_elevation = TRUE) {
-  requestParameters <- obj$requestParameters
-  plan <- obj$plan
-  debugOutput <- obj$debugOutput
-
-  itineraries <- plan$itineraries
-
-  itineraries$startTime <- as.POSIXct(itineraries$startTime / 1000,
+otp_json2sf <- function(itineraries, full_elevation = FALSE, get_geometry = TRUE,
+                        timezone = "", get_elevation = TRUE) {
+  itineraries$startTime <- lubridate::as_datetime(itineraries$startTime / 1000,
     origin = "1970-01-01", tz = timezone
   )
-  itineraries$endTime <- as.POSIXct(itineraries$endTime / 1000,
+
+  itineraries$endTime <- lubridate::as_datetime(itineraries$endTime / 1000,
     origin = "1970-01-01", tz = timezone
   )
 
 
-  legs <- list()
   # Loop over itineraries
-  for (i in seq(1, nrow(itineraries))) {
-    leg <- itineraries$legs[[i]]
-    # split into parts
-    vars <- leg
-    vars$from <- NULL
-    vars$to <- NULL
-    vars$steps <- NULL
-    vars$legGeometry <- NULL
+  legs <- lapply(itineraries$legs, parse_leg,
+    get_geometry = get_geometry,
+    get_elevation = get_elevation,
+    full_elevation = full_elevation
+  )
 
-    if (get_geometry) {
-      # Extract geometry
-      legGeometry <- leg$legGeometry$points
-
-      # Check for Elevations
-      steps <- leg$steps
-      if(get_elevation | full_elevation){
-        elevation <- lapply(seq(1, length(legGeometry)), function(x) {
-          leg$steps[[x]]$elevation
-        })
-        if (sum(lengths(elevation)) > 0) {
-          # We have Elevation Data
-          # Extract the elevation values
-          elevation <- lapply(seq(1, length(legGeometry)), function(x) {
-            dplyr::bind_rows(elevation[[x]])
-          })
-          elevation <- lapply(seq(1, length(legGeometry)), function(x) {
-            if (nrow(elevation[[x]]) == 0) {
-              NA
-            } else {
-              elevation[[x]]
-            }
-          })
-          # the x coordinate of elevation reset at each leg, correct for this
-          for (l in seq(1, length(elevation))) {
-            if (!all(is.na(elevation[[l]]))) {
-              elevation[[l]]$distance <- correct_distances(elevation[[l]]$first)
-            }
-          }
-          # process the lines into sf objects
-          lines <- list()
-          for (j in seq(1, length(legGeometry))) {
-            if(get_elevation){
-              lines[[j]] <- polyline2linestring(
-                line = legGeometry[j],
-                elevation = elevation[[j]]
-              )
-            } else {
-              lines[[j]] <- polyline2linestring(line = legGeometry[j])
-            }
-
-          }
-        } else {
-          lines <- polyline2linestring(legGeometry)
-        }
-      } else {
-        lines <- polyline2linestring(legGeometry)
-      }
-
-      lines <- sf::st_sfc(lines, crs = 4326)
-
-      vars$geometry <- lines
-      vars <- sf::st_sf(vars)
-
-      # Add full elevation if required
-      if (full_elevation) {
-        vars$elevation <- elevation
-      }
-    }
-
-    vars$route_option <- i
-
-    # return to list
-    legs[[i]] <- vars
-  }
-
+  names(legs) <- seq_len(length(legs))
   legs <- legs[!is.na(legs)]
-  #suppressWarnings(legs <- dplyr::bind_rows(legs))
-  legs <- dplyr::bind_rows(legs)
-  # if (get_geometry) {
-  #   # rebuild the sf object
-  #   legs <- as.data.frame(legs)
-  #   legs$geometry <- sf::st_sfc(legs$geometry)
-  #   legs <- sf::st_sf(legs)
-  #   sf::st_crs(legs) <- 4326
-  # }
+  legs <- data.table::rbindlist(legs, fill = TRUE, idcol = "route_option")
+  legs$route_option <- as.integer(legs$route_option)
 
-  legs$startTime <- as.POSIXct(legs$startTime / 1000,
+  legs$startTime <- lubridate::as_datetime(legs$startTime / 1000,
     origin = "1970-01-01", tz = timezone
   )
-  legs$endTime <- as.POSIXct(legs$endTime / 1000,
+  legs$endTime <- lubridate::as_datetime(legs$endTime / 1000,
     origin = "1970-01-01", tz = timezone
   )
 
@@ -617,11 +545,15 @@ otp_json2sf <- function(obj,
   # Extract Fare Info
   fare <- itineraries$fare
   if (!is.null(fare)) {
-    if(ncol(fare$fare) > 0){
-      itineraries$fare <- fare$fare$regular$cents / 100
-      itineraries$fare_currency <- fare$fare$regular$currency$currency
+    if (length(fare) == nrow(itineraries)) {
+      itineraries$fare <- vapply(fare, function(x) {
+        x$fare$regular$cents / 100
+      }, 1)
+      itineraries$fare_currency <- vapply(fare, function(x) {
+        x$fare$regular$currency$currency
+      }, "char")
     } else {
-      warning("Unstructured fare data has been discarded")
+      # warning("Unstructured fare data has been discarded")
       itineraries$fare <- NA
       itineraries$fare_currency <- NA
     }
@@ -630,20 +562,21 @@ otp_json2sf <- function(obj,
     itineraries$fare_currency <- NA
   }
 
-
-  itineraries <- itineraries[legs$route_option, ]
   names(legs)[names(legs) == "startTime"] <- "leg_startTime"
   names(legs)[names(legs) == "endTime"] <- "leg_endTime"
   names(legs)[names(legs) == "duration"] <- "leg_duration"
-  itineraries <- dplyr::bind_cols(itineraries, legs)
+
+  itineraries <- itineraries[legs$route_option, ]
+  itineraries <- cbind(itineraries, legs)
+
 
   if (get_geometry) {
-    itineraries <- sf::st_as_sf(itineraries)
-    sf::st_crs(itineraries) <- 4326
+    itineraries <- df2sf(itineraries)
   }
 
   return(itineraries)
 }
+
 
 #' Correct the elevation distances
 #'
@@ -662,26 +595,15 @@ otp_json2sf <- function(obj,
 
 correct_distances <- function(dists, err = 1) {
   lth <- length(dists)
-  if(lth <= 2){
+  if (lth <= 2) {
     return(dists) # Can't break up 2 points
   }
   brks <- dists[seq(1, lth - 1)] > (dists[seq(2, lth)] + err)
   brks <- seq(1, lth)[brks]
-  if(length(brks) == 0){
+  if (length(brks) == 0) {
     return(dists) # No places the length decreased
   }
-  mxs <- list()
-  brks_lth <- length(brks)
-  for (k in seq(1, brks_lth)) {
-    if (k == 1) {
-      mxs[[k]] <- max(dists[seq(1, brks[k])])
-    } else if (k <= brks_lth) {
-      mxs[[k]] <- max(dists[seq(brks[k - 1] + 1, brks[k])])
-    } else {
-      stop("error in sequence of correct_distances")
-    }
-  }
-  mxs <- unlist(mxs)
+  mxs <- dists[brks]
   mxs <- cumsum(mxs)
   mxs <- c(0, mxs)
   reps <- c(0, brks, lth)
@@ -690,31 +612,6 @@ correct_distances <- function(dists, err = 1) {
   res <- dists + csum
   return(res)
 }
-# correct_distances <- function(dists) {
-#   res <- list()
-#   rebase <- 0
-#   for (k in seq(1, length(dists))) {
-#     if (k == 1) {
-#       dists_k <- dists[k]
-#       res[[k]] <- dists_k
-#     } else {
-#       dists_k <- dists[k]
-#       res_km1 <- res[[k - 1]]
-#       if (dists_k == 0) {
-#         rebase <- rebase + dists[k - 1]
-#         res[[k]] <- dists_k + rebase
-#       } else {
-#         res[[k]] <- dists_k + rebase
-#       }
-#     }
-#   }
-#
-#   res <- unlist(res)
-#   return(res)
-# }
-
-
-
 
 #' Convert Google Encoded Polyline and elevation data into sf object
 #'
@@ -729,29 +626,27 @@ correct_distances <- function(dists, err = 1) {
 
 polyline2linestring <- function(line, elevation = NULL) {
   line <- googlePolylines::decode(line)[[1]]
-  line <- as.matrix(line[, 2:1])
+  line <- matrix(c(line$lon, line$lat), ncol = 2, dimnames = list(NULL, c("lon", "lat")))
+  # line <- as.matrix(line[, 2:1])
   if (!is.null(elevation)) {
     # Some modes don't have elevation e.g TRANSIT, check for this
     if (all(is.na(elevation))) {
       ele <- rep(0, nrow(line))
     } else {
-      elevation <- elevation[order(elevation$distance), ]
+      elevation$first <- NULL
+      elevation <- elevation[order(elevation$distance, method = "radix"), ]
       # Calculate the length of each segment
-      dist <- geodist::geodist(line[seq(1, nrow(line) - 1), , drop=FALSE],
-        line[seq(2, nrow(line)), , drop=FALSE],
-        paired = TRUE,
-        measure = "cheap"
-      )
+      dist <- geodist::geodist(line, sequential = TRUE, measure = "cheap")
       dist <- cumsum(dist)
       vals <- findInterval(dist, elevation$distance)
       vals[vals == 0] <- 1L
       ele <- elevation$second[c(1, vals)]
     }
     linestring3D <- cbind(line, ele)
-    linestring3D <- sf::st_linestring(linestring3D, dim = "XYZ")
+    linestring3D <- sfheaders::sfg_linestring(linestring3D)
     return(linestring3D)
   } else {
-    linestring <- sf::st_linestring(line)
+    linestring <- sfheaders::sfg_linestring(line)
     return(linestring)
   }
 }

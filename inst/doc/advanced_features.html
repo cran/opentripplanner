@@ -12,7 +12,7 @@
 
 <meta name="author" content="Malcolm Morgan" />
 
-<meta name="date" content="2020-06-09" />
+<meta name="date" content="2020-10-23" />
 
 <title>Advanced Features</title>
 
@@ -302,7 +302,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Advanced Features</h1>
 <h4 class="author">Malcolm Morgan</h4>
-<h4 class="date">2020-06-09</h4>
+<h4 class="date">2020-10-23</h4>
 
 
 
@@ -326,7 +326,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="batch-routing" class="section level2">
 <h2>Batch Routing</h2>
-<p>The <code>otp_plan()</code> function can produce multiple routes at once. In this example, we will gather data on travel times between each of the <a href="https://www.ons.gov.uk/methodology/geography/ukgeographies/censusgeography">LSOAs</a> on the Isle of White and the <a href="https://www.wightlink.co.uk/go/isle-of-wight-ferry-routes-destinations/">Ryde Ferry</a>.</p>
+<p>The <code>otp_plan()</code> function can produce multiple routes at once. In this example, we will gather data on travel times between each of the <a href="https://www.ons.gov.uk/methodology/geography/ukgeographies/censusgeography">LSOAs</a> on the Isle of White and the <a href="https://www.wightlink.co.uk/plan-your-journey/routes">Ryde Ferry</a>.</p>
 <p><code>otp_plan()</code> accepts three types of input for the <code>fromPlace</code> and <code>toPlace</code>: a numeric longitude/latitude pair; a 2 x m matrix where each row is a longitude/latitude pair; or an SF data.frame of only POINTS. The number of <code>fromPlace</code> and <code>toPlace</code> must be the same or equal one (in which case <code>otp_plan()</code> will repeat the single location to match the length of the longer locations.</p>
 <p>We’ll start by importing the locations of the LSOA points.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>lsoa &lt;-<span class="st"> </span>sf<span class="op">::</span><span class="kw">st_read</span>(<span class="st">&quot;https://github.com/ropensci/opentripplanner/releases/download/0.1/centroids.gpkg&quot;</span>,</span>
@@ -379,18 +379,23 @@ Driving Routes to Ryde Ferry
 </p>
 </div>
 </div>
+<div id="distance-balancing" class="section level3">
+<h3>Distance Balancing</h3>
+<p>When using multicore routing in <code>otp_plan</code> you can optionally set <code>distance_balance = TRUE</code>. Distance Balancing sorts the routes by decreasing euclidean distance before sending them to OTP to route. This results in more efficient <a href="https://en.wikipedia.org/wiki/Load_balancing_(computing)">load balancing</a> between the cores and thus a small reduction in routing time (around five percent). As the original order of the inputs is lost <code>fromID</code> and <code>toID</code> must be specified to use distance balancing.</p>
+</div>
 </div>
 <div id="elevation-profiles" class="section level2">
 <h2>Elevation Profiles</h2>
-<p>For walking and cycling routes the hilliness of the route matters. If elevation data is available OTP will return the elevation profile of the route. By default, OTP returns the elevation separately from the XY coordinates, but for convenience <code>otp_plan()</code> matches the Z coordinates to the XY coordinates. This may result in some minor misalignments. To demonstrate this, let’s get a walking route.</p>
+<p>For walking and cycling routes the hilliness of the route matters. If elevation data is available OTP will return the elevation profile of the route. By default, OTP returns the elevation separately from the XY coordinates, but for convenience <code>otp_plan()</code> has the argument <code>get_elevation</code> which matches the Z coordinates to the XY coordinates. This may result in some minor misalignments. To demonstrate this, let’s get a walking route.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>route &lt;-<span class="st"> </span><span class="kw">otp_plan</span>(<span class="dt">otpcon =</span> otpcon,</span>
 <span id="cb7-2"><a href="#cb7-2"></a>                    <span class="dt">fromPlace =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">1.18968</span>, <span class="fl">50.60096</span>),</span>
 <span id="cb7-3"><a href="#cb7-3"></a>                    <span class="dt">toPlace =</span> <span class="kw">c</span>(<span class="op">-</span><span class="fl">1.19105</span>, <span class="fl">50.60439</span>),</span>
 <span id="cb7-4"><a href="#cb7-4"></a>                    <span class="dt">mode =</span> <span class="st">&quot;WALK&quot;</span>,</span>
-<span id="cb7-5"><a href="#cb7-5"></a>                    <span class="dt">full_elevation =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<span id="cb7-5"><a href="#cb7-5"></a>                    <span class="dt">get_elevation =</span> <span class="ot">TRUE</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a>                    <span class="dt">full_elevation =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
 <p>Notice the use of <code>full_elevation = TRUE</code> this will return the raw elevation profile from OTP.</p>
 <p>We can view the raw profile. It is a data.frame of 3 columns, <code>first</code> is the distance along a leg of the route, <code>second</code> is the elevation, and <code>distance</code> is calculated by <code>otp_plan()</code> as the cumulative distance along the whole route.</p>
-<p>As of version 0.2.3.0 the <code>get_elevation</code> argument in <code>otp_plan</code> can be set to FALSE this speeds up routing by only returning XY coordinates rather than XYZ coordinates.</p>
+<p>As of version 0.3.0.0 the <code>get_elevation</code> argument in <code>otp_plan</code> is set to FALSE by default, this speeds up routing by only returning XY coordinates rather than XYZ coordinates.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>profile_raw &lt;-<span class="st"> </span>route<span class="op">$</span>elevation[[<span class="dv">1</span>]]</span>
 <span id="cb8-2"><a href="#cb8-2"></a><span class="kw">plot</span>(profile_raw<span class="op">$</span>distance, profile_raw<span class="op">$</span>second, <span class="dt">type =</span> <span class="st">&quot;p&quot;</span>,</span>
 <span id="cb8-3"><a href="#cb8-3"></a>     <span class="dt">xlab =</span> <span class="st">&quot;distance along route&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;elevation&quot;</span>)</span></code></pre></div>

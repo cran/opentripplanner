@@ -2,7 +2,7 @@
 
 skip_no_otp <- function() {
   if (!identical(Sys.getenv("I_have_OTP"), "TRUE")) {
-  # if (!otp_check_java()) {
+    # if (!otp_check_java()) {
     skip("Not running full test.")
   }
 }
@@ -10,7 +10,7 @@ skip_no_otp <- function() {
 context("Test the download of the LSOA file")
 
 f <- file.path(tempdir(), "centroids.gpkg")
-download.file("https://github.com/ropensci/opentripplanner/releases/download/0.1/centroids.gpkg", f,  mode = "wb", quiet = TRUE)
+download.file("https://github.com/ropensci/opentripplanner/releases/download/0.1/centroids.gpkg", f, mode = "wb", quiet = TRUE)
 lsoa <- sf::read_sf(f)
 file.remove(f)
 test_that("can get lsoa points", {
@@ -21,7 +21,7 @@ test_that("can get lsoa points", {
 context("Check previous tests have left the files we need")
 
 path_data <- file.path(tempdir(), "otptests")
-path_otp <- file.path(path_data, "otp.jar")
+path_otp <- file.path(path_data, "otp-1.4.0-shaded.jar")
 
 test_that("path_data is valid", {
   skip_no_otp()
@@ -33,29 +33,29 @@ test_that("path_otp is valid", {
   expect_true(file.exists(path_otp))
 })
 
-context("download special testing data")
-url <- "https://github.com/ropensci/opentripplanner/releases/download/0.1/test_data.zip"
-dir.create(file.path(path_data,"graphs","tests"))
-utils::download.file(
-  url = url,
-  destfile = file.path(path_data,"graphs","tests","test_data.zip"),
-  mode = "wb",
-  quiet = TRUE
-)
-utils::unzip(file.path(path_data,"graphs","tests","test_data.zip"),
-             exdir = file.path(path_data, "graphs", "tests")
-)
-unlink(file.path(path_data,"graphs","tests","test_data.zip"))
+# context("download special testing data")
+# url <- "https://github.com/ropensci/opentripplanner/releases/download/0.1/test_data.zip"
+# dir.create(file.path(path_data, "graphs", "tests"))
+# utils::download.file(
+#   url = url,
+#   destfile = file.path(path_data, "graphs", "tests", "test_data.zip"),
+#   mode = "wb",
+#   quiet = TRUE
+# )
+# utils::unzip(file.path(path_data, "graphs", "tests", "test_data.zip"),
+#   exdir = file.path(path_data, "graphs", "tests")
+# )
+# unlink(file.path(path_data, "graphs", "tests", "test_data.zip"))
 
 context("Test the otp_build_graph function")
 
 test_that("We can build an otp graph", {
   skip_no_otp()
-  log <- otp_build_graph(otp = path_otp, dir = path_data, router = "tests")
+  log <- otp_build_graph(otp = path_otp, dir = path_data, router = "default")
   expect_true(file.exists(file.path(
     path_data,
     "graphs",
-    "tests",
+    "default",
     "Graph.obj"
   )))
 })
@@ -64,7 +64,7 @@ context("Test the otp_setup function")
 
 test_that("We can startup OTP", {
   skip_no_otp()
-  expect_message(otp_setup(otp = path_otp, dir = path_data, router = "tests"),
+  expect_message(log <- otp_setup(otp = path_otp, dir = path_data, router = "default"),
     regexp = "OTP is ready to use"
   )
 })
@@ -74,15 +74,15 @@ context("Test the otp_connect function")
 
 test_that("object returned when check is TRUE and router exists", {
   skip_no_otp()
-  otpcon <- otp_connect(router = "tests")
+  otpcon <- otp_connect(router = "default")
   expect_is(otpcon, "otpconnect")
 })
 
 test_that("correct message when check is TRUE and router exists", {
   skip_no_otp()
   expect_message(
-    otp_connect(router = "tests"),
-    "Router http://localhost:8080/otp/routers/tests exists"
+    otp_connect(router = "default"),
+    "Router http://localhost:8080/otp/routers/default exists"
   )
 })
 
@@ -95,7 +95,7 @@ test_that("correct error when check is TRUE and router does not exist", {
 })
 
 if (identical(Sys.getenv("I_have_OTP"), "TRUE")) {
-  otpcon <- otp_connect(router = "tests")
+  otpcon <- otp_connect(router = "default")
 }
 
 context("Test the otp_plan function")
@@ -108,6 +108,19 @@ test_that("basic routing", {
   )
   expect_is(route, "sf")
   expect_true(nrow(route) == 1)
+  expect_true(ncol(route) == 33)
+  expect_true(all(names(route) %in%
+    c(
+      "duration", "startTime", "endTime", "walkTime",
+      "transitTime", "waitingTime", "walkDistance", "walkLimitExceeded",
+      "elevationLost", "elevationGained", "transfers", "tooSloped",
+      "fare", "fare_currency", "leg_startTime", "leg_endTime",
+      "departureDelay", "arrivalDelay", "realTime", "distance",
+      "pathway", "mode", "route", "agencyTimeZoneOffset",
+      "interlineWithPreviousLeg", "rentedBike", "flexDrtAdvanceBookMin", "leg_duration",
+      "transitLeg", "route_option", "fromPlace", "toPlace",
+      "geometry"
+    )))
 })
 
 
@@ -121,6 +134,21 @@ test_that("transit routing", {
   )
   expect_is(route, "sf")
   expect_true(nrow(route) == 9)
+  expect_true(ncol(route) == 42)
+  expect_true(all(names(route) %in%
+    c(
+      "duration", "startTime", "endTime", "walkTime",
+      "transitTime", "waitingTime", "walkDistance", "walkLimitExceeded",
+      "elevationLost", "elevationGained", "transfers", "fare",
+      "tooSloped", "fare_currency", "leg_startTime", "leg_endTime",
+      "departureDelay", "arrivalDelay", "realTime", "distance",
+      "pathway", "mode", "route", "agencyTimeZoneOffset",
+      "interlineWithPreviousLeg", "rentedBike", "flexDrtAdvanceBookMin", "leg_duration",
+      "transitLeg", "agencyName", "agencyUrl", "routeType",
+      "routeId", "agencyId", "tripId", "serviceDate",
+      "routeShortName", "routeLongName", "route_option", "fromPlace",
+      "toPlace", "geometry"
+    )))
 })
 
 
@@ -133,6 +161,7 @@ test_that("no geometry routing", {
   )
   expect_is(route, "data.frame")
   expect_true(nrow(route) == 1)
+  expect_true(ncol(route) == 32)
 })
 
 test_that("full elevation routing", {
@@ -143,6 +172,8 @@ test_that("full elevation routing", {
     full_elevation = TRUE
   )
   expect_is(route, "sf")
+  expect_true(nrow(route) == 1)
+  expect_true(ncol(route) == 34)
   expect_is(route$elevation, "list")
 })
 
@@ -155,7 +186,20 @@ test_that("batch routing", {
     toPlace = lsoa[11:20, ]
   )
   expect_is(routes, "sf")
-  expect_true(nrow(routes) == 2)
+  expect_true(nrow(routes) == 10)
+  expect_true(ncol(routes) == 33)
+  expect_true(all(names(routes) %in%
+    c(
+      "duration", "startTime", "endTime", "walkTime",
+      "transitTime", "waitingTime", "walkDistance", "walkLimitExceeded",
+      "elevationLost", "elevationGained", "transfers", "tooSloped",
+      "fare", "fare_currency", "leg_startTime", "leg_endTime",
+      "departureDelay", "arrivalDelay", "realTime", "distance",
+      "pathway", "mode", "route", "agencyTimeZoneOffset",
+      "interlineWithPreviousLeg", "rentedBike", "flexDrtAdvanceBookMin", "leg_duration",
+      "transitLeg", "route_option", "fromPlace", "toPlace",
+      "geometry"
+    )))
 })
 
 
@@ -173,6 +217,10 @@ test_that("basic isochrone", {
   ) # Cut offs in seconds
   expect_is(ferry_current, "sf")
   expect_true(nrow(ferry_current) == 6)
+  expect_true(ncol(ferry_current) == 4)
+  expect_true(all(names(ferry_current) %in%
+    c("id", "time", "fromPlace", "geometry")))
+  expect_true(all(ferry_current$time == c(90, 75, 60, 45, 30, 15) * 60))
 })
 
 test_that("nonsence isochrone", {
@@ -193,6 +241,7 @@ test_that("basic geocode", {
   )
   expect_is(stations, "sf")
   expect_true(nrow(stations) == 10)
+  expect_true(ncol(stations) == 3)
 })
 
 
@@ -230,9 +279,7 @@ test_that("otp_stop", {
   if (checkmate::test_os("windows")) {
     expect_true(grepl("SUCCESS", foo))
   } else {
-    #expect_true(grepl("The following Java instances have been found", foo))
+    # expect_true(grepl("The following Java instances have been found", foo))
     expect_true(TRUE)
   }
 })
-
-

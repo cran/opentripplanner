@@ -15,7 +15,10 @@
 #  dir.create(path_data)
 
 ## ---- eval=FALSE--------------------------------------------------------------
-#  path_otp <- otp_dl_jar(path_data)
+#  path_otp <- otp_dl_jar()
+
+## ---- eval=FALSE--------------------------------------------------------------
+#  path_otp <- otp_dl_jar(path_data, cache = FALSE)
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  otp_dl_demo(path_data)
@@ -32,7 +35,7 @@
 ## ---- eval = FALSE------------------------------------------------------------
 #  log2 <- otp_setup(otp = path_otp, dir = path_data, port = 8801, securePort = 8802)
 
-## ---- echo = FALSE, fig.align='center', fig.cap="\\label{fig:otpgui}OTP Web GUI"----
+## ---- echo = FALSE, fig.align='center', fig.cap="\\label{fig:otpgui}OTP Web Interface"----
 knitr::include_graphics("images/otpwebgui.jpg")
 
 ## ---- eval = FALSE------------------------------------------------------------
@@ -55,7 +58,7 @@ knitr::include_graphics("images/otpwebgui.jpg")
 #  # install.packages("tmap") # Only needed if you don't have tmap
 #  library(tmap)              # Load the tmap package
 #  tmap_mode("view")          # Set tmap to interactive viewing
-#  qtm(sf::st_zm(route))      # Plot the route on a map
+#  qtm(route)      # Plot the route on a map
 
 ## ---- eval = FALSE------------------------------------------------------------
 #  otp_stop()
