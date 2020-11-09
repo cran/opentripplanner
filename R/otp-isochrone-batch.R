@@ -136,12 +136,12 @@ otp_isochrone <- function(otpcon = NA,
     if (any(unlist(lapply(results, function(x) {
       "sf" %in% class(x)
     }), use.names = FALSE))) {
-      results_routes <- data.table::rbindlist(results_routes)
+      results_routes <- data.table::rbindlist(results_routes, fill = TRUE)
       results_routes <- as.data.frame(results_routes)
       results_routes$geometry <- sf::st_sfc(results_routes$geometry)
       results_routes <- sf::st_sf(results_routes, crs = 4326)
     } else {
-      results_routes <- data.table::rbindlist(results_routes)
+      results_routes <- data.table::rbindlist(results_routes, fill = TRUE)
     }
   }
 
@@ -232,7 +232,7 @@ otp_isochrone_internal <- function(otpcon = NA,
   # convert response content into text
   url <- build_url(routerUrl, query)
   h <- curl::new_handle()
-  h <- curl::handle_setheaders(h,"Accept" = "application/json")
+  h <- curl::handle_setheaders(h, "Accept" = "application/json")
   text <- curl::curl_fetch_memory(url, h)
   text <- text$content
   text <- rawToChar(text)

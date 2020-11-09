@@ -1,3 +1,7 @@
+# opentripplanner 0.3.1
+
+Limited support for version of R than can't install `RcppSimdJson`
+
 # opentripplanner 0.3.0
 
 Note that this version makes minor changes to how results are returned, for example column order. These changes are due to the new json parser and should not affect the overall results but may affect any dependent code.

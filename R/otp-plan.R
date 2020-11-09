@@ -118,6 +118,19 @@ otp_plan <- function(otpcon = NA,
     warning("otpcon is missing the timezone variaible, assuming local timezone")
     timezone <- Sys.timezone()
   }
+
+  # Back compatibility with RcppSimdJson <= 0.1.1
+  RcppSimdJsonVersion <- try(utils::packageVersion("RcppSimdJson") >= "0.1.2", silent = TRUE)
+  if (class(RcppSimdJsonVersion) == "try-error") {
+    RcppSimdJsonVersion <- FALSE
+  }
+
+  if (!RcppSimdJsonVersion) {
+    message("NOTE: You do not have 'RcppSimdJson' >= 0.1.2 installed")
+    message("'opentripplanner' is in legacy mode with some features disabled")
+    message("Either update 'RcppSimdJson' or revert to 'opentripplanner' v0.2.3")
+  }
+
   checkmate::assert_subset(timezone, choices = OlsonNames(tzdir = NULL))
 
   checkmate::assert_class(otpcon, "otpconnect")
@@ -212,42 +225,64 @@ otp_plan <- function(otpcon = NA,
     toID <- toID[dists]
   }
 
-  if (ncores > 1) {
-    cl <- parallel::makeCluster(ncores)
-    parallel::clusterExport(
-      cl = cl,
-      varlist = c("otpcon", "fromPlace", "toPlace", "fromID", "toID"),
-      envir = environment()
-    )
-    parallel::clusterEvalQ(cl, {
-      loadNamespace("opentripplanner")
-    })
-    pbapply::pboptions(use_lb = TRUE)
-    results <- pbapply::pblapply(seq(1, nrow(fromPlace)),
-      otp_get_results,
-      otpcon = otpcon,
-      fromPlace = fromPlace,
-      toPlace = toPlace,
-      fromID = fromID,
-      toID = toID,
-      mode = mode,
-      date = date,
-      time = time,
-      arriveBy = arriveBy,
-      maxWalkDistance = maxWalkDistance,
-      numItineraries = numItineraries,
-      routeOptions = routeOptions,
-      full_elevation = full_elevation,
-      get_geometry = get_geometry,
-      timezone = timezone,
-      get_elevation = get_elevation,
-      cl = cl
-    )
-    parallel::stopCluster(cl)
-    rm(cl)
+  if (RcppSimdJsonVersion) {
+    if (ncores > 1) {
+      cl <- parallel::makeCluster(ncores)
+      parallel::clusterExport(
+        cl = cl,
+        varlist = c("otpcon", "fromPlace", "toPlace", "fromID", "toID"),
+        envir = environment()
+      )
+      parallel::clusterEvalQ(cl, {
+        loadNamespace("opentripplanner")
+      })
+      pbapply::pboptions(use_lb = TRUE)
+      results <- pbapply::pblapply(seq(1, nrow(fromPlace)),
+        otp_get_results,
+        otpcon = otpcon,
+        fromPlace = fromPlace,
+        toPlace = toPlace,
+        fromID = fromID,
+        toID = toID,
+        mode = mode,
+        date = date,
+        time = time,
+        arriveBy = arriveBy,
+        maxWalkDistance = maxWalkDistance,
+        numItineraries = numItineraries,
+        routeOptions = routeOptions,
+        full_elevation = full_elevation,
+        get_geometry = get_geometry,
+        timezone = timezone,
+        get_elevation = get_elevation,
+        cl = cl
+      )
+      parallel::stopCluster(cl)
+      rm(cl)
+    } else {
+      results <- pbapply::pblapply(seq(1, nrow(fromPlace)),
+        otp_get_results,
+        otpcon = otpcon,
+        fromPlace = fromPlace,
+        toPlace = toPlace,
+        fromID = fromID,
+        toID = toID,
+        mode = mode,
+        date = date,
+        time = time,
+        arriveBy = arriveBy,
+        maxWalkDistance = maxWalkDistance,
+        numItineraries = numItineraries,
+        routeOptions = routeOptions,
+        full_elevation = full_elevation,
+        get_geometry = get_geometry,
+        get_elevation = get_elevation,
+        timezone = timezone
+      )
+    }
   } else {
     results <- pbapply::pblapply(seq(1, nrow(fromPlace)),
-      otp_get_results,
+      otp_get_results_legacy,
       otpcon = otpcon,
       fromPlace = fromPlace,
       toPlace = toPlace,
@@ -266,6 +301,8 @@ otp_plan <- function(otpcon = NA,
       timezone = timezone
     )
   }
+
+
 
 
 
@@ -289,7 +326,7 @@ otp_plan <- function(otpcon = NA,
       "sf" %in% class(x)
     }), use.names = FALSE))) {
       results_routes <- data.table::rbindlist(results_routes, fill = TRUE)
-      results_routes <- as.data.frame(results_routes)
+      results_routes <- list2df(results_routes)
       results_routes <- df2sf(results_routes)
       # fix for bbox error from data.table
       results_routes <- results_routes[seq_len(nrow(results_routes)), ]
@@ -413,6 +450,7 @@ otp_clean_input <- function(imp, imp_name) {
 #' @param get_geometry logical, should geometry be returned
 #' @param timezone timezone to use
 #' @param get_elevation Logical, should you get elevation
+#' @param RcppSimdJsonVersion Logical, is RcppSimdJson Version >= 0.1.2
 #' @family internal
 #' @details
 #' This function returns a SF data.frame with one row for each leg of the journey
@@ -467,6 +505,7 @@ otp_plan_internal <- function(otpcon = NA,
   url <- build_url(routerUrl, query)
   text <- curl::curl_fetch_memory(url)
   text <- rawToChar(text$content)
+
   asjson <- try(RcppSimdJson::fparse(text, query = "/plan/itineraries"),
     silent = TRUE
   )
@@ -511,7 +550,7 @@ otp_plan_internal <- function(otpcon = NA,
 #' @noRd
 
 otp_json2sf <- function(itineraries, full_elevation = FALSE, get_geometry = TRUE,
-                        timezone = "", get_elevation = TRUE) {
+                        timezone = "", get_elevation = FALSE) {
   itineraries$startTime <- lubridate::as_datetime(itineraries$startTime / 1000,
     origin = "1970-01-01", tz = timezone
   )
