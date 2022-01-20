@@ -12,9 +12,35 @@
 
 <meta name="author" content="Malcolm Morgan" />
 
-<meta name="date" content="2020-11-04" />
+<meta name="date" content="2022-01-20" />
 
 <title>Prerequisites</title>
+
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 
 
@@ -215,7 +241,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Prerequisites</h1>
 <h4 class="author">Malcolm Morgan</h4>
-<h4 class="date">2020-11-04</h4>
+<h4 class="date">2022-01-20</h4>
 
 
 
@@ -233,7 +259,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>The <code>opentripplanner</code> R package makes it easier for R and OpenTripPlanner to communicate. Specifically, it allows you to do use R to control OTP and use it as a local routing service. For more on local versus remote routing services, see the Transportation chapter in <a href="https://geocompr.robinlovelace.net/transport.html">Geocomputation with R</a>.</p>
 <div id="what-are-r-and-rstudio" class="section level3">
 <h3>What are R and RStudio?</h3>
-<p><a href="https://www.r-project.org/">R</a> is an open-source programming language and free software environment for statistical computing and graphics. R has many capabilities for analysing data and writing software, but in this context, its ability to produce and analyse spatial data and maps is most relevant. <a href="https://rstudio.com/">RStudio</a> is an Integrated Development Environment (IDE) for R which is free for personal use.</p>
+<p><a href="https://www.r-project.org/">R</a> is an open-source programming language and free software environment for statistical computing and graphics. R has many capabilities for analysing data and writing software, but in this context, its ability to produce and analyse spatial data and maps is most relevant. <a href="https://www.rstudio.com/">RStudio</a> is an Integrated Development Environment (IDE) for R which is free for personal use.</p>
 </div>
 <div id="what-is-an-r-package" class="section level3">
 <h3>What is an R package?</h3>
@@ -241,7 +267,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 <div id="help-with-r" class="section level3">
 <h3>Help with R</h3>
-<p>To get started with R, see <a href="https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf">An Introduction to R</a> or from within R by running <code>help.start()</code>, introductory tutorials such as DataCamp’s free <a href="https://www.datacamp.com/courses/free-introduction-to-r">Introduction to R course</a>, or the <a href="http://www.r-tutor.com/r-introduction">R tutor website</a>. The <a href="https://geocompr.robinlovelace.net">Geocomputation with R</a> book covers the packages and skills required to analyse spatial datasets such as those produced by OpenTripPlanner.</p>
+<p>To get started with R, see <a href="https://cran.r-project.org/doc/manuals/r-release/R-intro.pdf">An Introduction to R</a> or from within R by running <code>help.start()</code>, introductory tutorials such as DataCamp’s free Introduction to R course, or the <a href="http://www.r-tutor.com/r-introduction">R tutor website</a>. The <a href="https://geocompr.robinlovelace.net">Geocomputation with R</a> book covers the packages and skills required to analyse spatial datasets such as those produced by OpenTripPlanner.</p>
 <p>A video tutorial for installing R and RStudio</p>
 <ul>
 <li>On <a href="https://www.youtube.com/watch?v=cX532N_XLIs">Mac</a></li>
@@ -284,7 +310,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>The OpenTripPlanner for R package requires:</p>
 <ul>
 <li>R - <a href="https://cran.r-project.org/mirrors.html">download R</a> selecting your country (or nearest available country)</li>
-<li>RStudio - <a href="https://rstudio.com/products/rstudio/download/">download free version</a> for personal use. RStudio is not essential but is strongly recommended.</li>
+<li>RStudio - <a href="https://www.rstudio.com/products/rstudio/download/">download free version</a> for personal use. RStudio is not essential but is strongly recommended.</li>
 <li>Java 8 <strong>Note</strong> OTP does not work with later versions of Java such as Java 11.</li>
 </ul>
 <p>Download and install Java 8. You will need the correct version for your operating system. If possible the 64 Bit version of Java is preferable, especially if you want to use OTP over large areas.</p>

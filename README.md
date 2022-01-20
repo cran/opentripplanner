@@ -5,7 +5,7 @@
 
 [![R build
 status](https://github.com/ropensci/opentripplanner/workflows/R-CMD-check/badge.svg)](https://github.com/ropensci/opentripplanner/actions)
-[![codecov](https://codecov.io/gh/ropensci/opentripplanner/branch/master/graph/badge.svg)](https://codecov.io/gh/ropensci/opentripplanner)
+[![codecov](https://app.codecov.io/gh/ropensci/opentripplanner/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ropensci/opentripplanner)
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
@@ -63,7 +63,7 @@ library(opentripplanner)
 
 From version 0.3.0 of `opentripplanner` the package `RcppSimdJson` is
 used for JSON parsing. This package is not supported on some older
-versions or R (\<= 3.6) and some older Operating Systems. To meet CRAN
+versions of R (\<= 3.6) and some older Operating Systems. To meet CRAN
 requirements version 0.3.1 added a legacy mode for older versions of R.
 This legacy mode has reduced functionality and users on old systems may
 get better results using version 0.2.3 of the package. You can install
@@ -95,9 +95,14 @@ Functions for connecting to a local or remote instance of OTP:
 Functions for retrieving data from OTP:
 
 1.  `otp_plan()` To get routes from A to B;
-2.  `otp_isochrone()` To get isochrone maps;
-3.  `otp_geocode()` To get the locations of named places e.g. road
+2.  `otp_geocode()` To get the locations of named places e.g. road
     names.
+3.  `otp_isochrone()` To get isochrone maps (OTP 1.x only);
+4.  `otp_make_surface()` To make an analyst surface (OTP 1.x only);
+5.  `otp_surface()` To evaluate a analyst surface (OTP 1.x only);
+6.  `otp_traveltime()` To make a travel time matrix (OTP 1.x only);
+7.  `otp_surface_isochrone()` To make a raster isochrone map (OTP 1.x
+    only);
 
 Results are returned as [sf
 objects](https://CRAN.R-project.org/package=sf).

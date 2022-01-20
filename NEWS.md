@@ -1,3 +1,22 @@
+# opentripplanner 0.4.0
+
+* Fix broken or moved URLs
+* `tibble` moved from imports to suggests
+* Support for OTP 2.0
+* Support for analyst features in OTP 1.x with new functions
+* Support for `s2` features in the `sf` package
+
+# opentripplanner 0.3.2
+
+* Fix a bug with parsing fare data
+* Fix bug with latest version of Java defaulting to 32Bit even when 64bit is available.
+* Added more `try()` functions to reduce risk of crashes in large scale batch routing
+* Added `flag64bit` argument to `otp_build_graph()` and `otp_setup()`
+* Added `quiet` argument to `otp_build_graph()`
+* Updated the Known Issues Vignette
+* reduce initial wait time for `otp_setup()` from 60 seconds to 30 seconds
+* switch to OTP 1.5.0 as default version in `otp_dl_jar()`
+
 # opentripplanner 0.3.1
 
 Limited support for version of R than can't install `RcppSimdJson`

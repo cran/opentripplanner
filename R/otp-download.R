@@ -3,7 +3,7 @@
 #' @description Download the OTP jar file from maven.org
 #'
 #' @param path path to folder where OTP is to be stored
-#' @param version a character string of the version number default is "1.4.0"
+#' @param version a character string of the version number default is "1.5.0"
 #' @param file_name file name to give the otp default "otp.jar"
 #' @param url URL to the download server
 #' @param quiet logical, passed to download.file, default FALSE
@@ -20,7 +20,7 @@
 #' @export
 
 otp_dl_jar <- function(path = NULL,
-                       version = "1.4.0",
+                       version = "1.5.0",
                        file_name = paste0("otp-", version, "-shaded.jar"),
                        url = "https://repo1.maven.org/maven2/org/opentripplanner/otp",
                        quiet = FALSE,
@@ -48,7 +48,12 @@ otp_dl_jar <- function(path = NULL,
     destfile <- file.path(path, file_name)
   }
 
+  if (version == "2.0.0") {
+    warning("OTP2 support is in beta \n")
+  }
+
   url <- paste0(url, "/", version, "/otp-", version, "-shaded.jar")
+
   message("The OTP will be saved to ", destfile)
   utils::download.file(url = url, destfile = destfile, mode = "wb", quiet = quiet)
   return(destfile)

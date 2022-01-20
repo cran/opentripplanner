@@ -22,7 +22,7 @@ library(opentripplanner)
 # Path to a folder containing the OTP.jar file, change to where you saved the file.
 path_data <- file.path(tempdir(), "OTP")
 dir.create(path_data)
-path_otp <- otp_dl_jar(path_data)
+path_otp <- otp_dl_jar()
 otp_dl_demo(path_data)
 # Build Graph and start OTP
 log1 <- otp_build_graph(otp = path_otp, dir = path_data)
@@ -215,7 +215,7 @@ You can read more about the different debug layers in the official OTP documenta
 
 ## Analyst
 
-Older versions of OTP has some limited analytical features built-in which needed to be enabled during graph build and startup. These features are accessible via the `analyst = TRUE` arguments of `otp_build_graph()` and `otp_setup()`. For more information see the [OTP documentation](http://docs.opentripplanner.org/en/latest/Analyst/)
+Older versions of OTP has some limited analytical features built-in which needed to be enabled during graph build and startup. These features are accessible via the `analyst = TRUE` arguments of `otp_build_graph()` and `otp_setup()`. For more information see the [OTP documentation](https://docs.ropensci.org/opentripplanner/articles/Analyst.html)
 
 ## Configuring OpenTripPlanner
 
@@ -237,3 +237,33 @@ otp_write_config(router_config,                # Save the config file
 ```
 
 There is much more information about configuring OpenTripPlanner at https://opentripplanner.readthedocs.io/en/latest/Configuration/ 
+
+## Running an OTP instance in Docker
+We have been able to run OTP version 1.5.0 from `https://repo1.maven.org/maven2/org/opentripplanner/otp/` in a Dockerfile and query it via the package. The basic Dockerfile looks like:
+
+```Docker
+
+FROM java:8-alpine
+
+ENV OTP_VERSION=1.5.0
+ENV JAVA_OPTIONS=-Xmx1G
+
+ADD https://repo1.maven.org/maven2/org/opentripplanner/otp/$OTP_VERSION/otp-$OTP_VERSION-shaded.jar /usr/local/share/java/otp.jar
+
+COPY otp /usr/local/bin/
+
+EXPOSE 8080
+
+ENTRYPOINT ["otp"]
+CMD ["--help"]
+```
+And then you can build the image using a default Docker build command like `docker build -t <name> .` where of course "." is your working directory with your Dockerfile in. Then just running the instance like
+
+```sh
+docker run \
+  -p 8080:8080 \
+  -v $PWD/graphs:/var/otp/graphs \
+  -e JAVA_OPTIONS=-Xmx4G \
+  urbica/otp --server --autoScan --verbose
+```
+That of course let us place our graphs in the docker volume `$PWD/graphs`. This is slightly edited version of the work described [here](https://github.com/urbica/docker-otp).

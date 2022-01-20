@@ -144,7 +144,6 @@ You can also use the `otp_connect()` function to make a connection to OTP on a r
 otpcon <- otp_connect(url = "https://api.digitransit.fi/routing/v1/routers/hsl")
 ```
 
-
 ## Getting a route from the OTP
 
 Now we can use R to get a route from the OTP. OTP accepts pairs of longitude/latitude coordinates for a `fromPlace` (start of the journey) and `toPlace` (end of the journey).

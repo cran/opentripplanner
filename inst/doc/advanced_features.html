@@ -12,13 +12,45 @@
 
 <meta name="author" content="Malcolm Morgan" />
 
-<meta name="date" content="2020-11-04" />
+<meta name="date" content="2022-01-20" />
 
 <title>Advanced Features</title>
 
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
 code.sourceCode > span { display: inline-block; line-height: 1.25; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -106,6 +138,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   }
 })();
 </script>
+
 
 
 
@@ -303,7 +336,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Advanced Features</h1>
 <h4 class="author">Malcolm Morgan</h4>
-<h4 class="date">2020-11-04</h4>
+<h4 class="date">2022-01-20</h4>
 
 
 
@@ -317,7 +350,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb1-2"><a href="#cb1-2"></a><span class="co"># Path to a folder containing the OTP.jar file, change to where you saved the file.</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a>path_data &lt;-<span class="st"> </span><span class="kw">file.path</span>(<span class="kw">tempdir</span>(), <span class="st">&quot;OTP&quot;</span>)</span>
 <span id="cb1-4"><a href="#cb1-4"></a><span class="kw">dir.create</span>(path_data)</span>
-<span id="cb1-5"><a href="#cb1-5"></a>path_otp &lt;-<span class="st"> </span><span class="kw">otp_dl_jar</span>(path_data)</span>
+<span id="cb1-5"><a href="#cb1-5"></a>path_otp &lt;-<span class="st"> </span><span class="kw">otp_dl_jar</span>()</span>
 <span id="cb1-6"><a href="#cb1-6"></a><span class="kw">otp_dl_demo</span>(path_data)</span>
 <span id="cb1-7"><a href="#cb1-7"></a><span class="co"># Build Graph and start OTP</span></span>
 <span id="cb1-8"><a href="#cb1-8"></a>log1 &lt;-<span class="st"> </span><span class="kw">otp_build_graph</span>(<span class="dt">otp =</span> path_otp, <span class="dt">dir =</span> path_data)</span>
@@ -462,7 +495,7 @@ Isochrones from Ryde ferry
 </div>
 <div id="analyst" class="section level2">
 <h2>Analyst</h2>
-<p>Older versions of OTP has some limited analytical features built-in which needed to be enabled during graph build and startup. These features are accessible via the <code>analyst = TRUE</code> arguments of <code>otp_build_graph()</code> and <code>otp_setup()</code>. For more information see the <a href="http://docs.opentripplanner.org/en/latest/Analyst/">OTP documentation</a></p>
+<p>Older versions of OTP has some limited analytical features built-in which needed to be enabled during graph build and startup. These features are accessible via the <code>analyst = TRUE</code> arguments of <code>otp_build_graph()</code> and <code>otp_setup()</code>. For more information see the <a href="https://docs.ropensci.org/opentripplanner/articles/Analyst.html">OTP documentation</a></p>
 </div>
 <div id="configuring-opentripplanner" class="section level2">
 <h2>Configuring OpenTripPlanner</h2>
@@ -477,6 +510,31 @@ Isochrones from Ryde ferry
 <span id="cb13-6"><a href="#cb13-6"></a>                 <span class="dt">dir =</span> path_data,</span>
 <span id="cb13-7"><a href="#cb13-7"></a>                 <span class="dt">router =</span> <span class="st">&quot;default&quot;</span>)</span></code></pre></div>
 <p>There is much more information about configuring OpenTripPlanner at <a href="https://opentripplanner.readthedocs.io/en/latest/Configuration/" class="uri">https://opentripplanner.readthedocs.io/en/latest/Configuration/</a></p>
+</div>
+<div id="running-an-otp-instance-in-docker" class="section level2">
+<h2>Running an OTP instance in Docker</h2>
+<p>We have been able to run OTP version 1.5.0 from <code>https://repo1.maven.org/maven2/org/opentripplanner/otp/</code> in a Dockerfile and query it via the package. The basic Dockerfile looks like:</p>
+<pre class="docker"><code>
+FROM java:8-alpine
+
+ENV OTP_VERSION=1.5.0
+ENV JAVA_OPTIONS=-Xmx1G
+
+ADD https://repo1.maven.org/maven2/org/opentripplanner/otp/$OTP_VERSION/otp-$OTP_VERSION-shaded.jar /usr/local/share/java/otp.jar
+
+COPY otp /usr/local/bin/
+
+EXPOSE 8080
+
+ENTRYPOINT [&quot;otp&quot;]
+CMD [&quot;--help&quot;]</code></pre>
+<p>And then you can build the image using a default Docker build command like <code>docker build -t &lt;name&gt; .</code> where of course “.” is your working directory with your Dockerfile in. Then just running the instance like</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1"></a><span class="ex">docker</span> run \</span>
+<span id="cb15-2"><a href="#cb15-2"></a>  -p 8080:8080 \</span>
+<span id="cb15-3"><a href="#cb15-3"></a>  -v <span class="va">$PWD</span>/graphs:/var/otp/graphs \</span>
+<span id="cb15-4"><a href="#cb15-4"></a>  -e JAVA_OPTIONS=-Xmx4G \</span>
+<span id="cb15-5"><a href="#cb15-5"></a>  urbica/otp --server --autoScan --verbose</span></code></pre></div>
+<p>That of course let us place our graphs in the docker volume <code>$PWD/graphs</code>. This is slightly edited version of the work described <a href="https://github.com/urbica/docker-otp">here</a>.</p>
 </div>
 
 
