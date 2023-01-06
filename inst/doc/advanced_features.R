@@ -11,8 +11,8 @@
 #  otpcon <- otp_connect(timezone = "Europe/London")
 
 ## ---- eval=FALSE--------------------------------------------------------------
-#  lsoa <- sf::st_read("https://github.com/ropensci/opentripplanner/releases/download/0.1/centroids.gpkg",
-#                      stringsAsFactors = FALSE)
+#  download.file("https://github.com/ropensci/opentripplanner/releases/download/0.1/centroids.gpkg", "centroids.gpkg", mode = "wb")
+#  lsoa <- sf::st_read("centroids.gpkg", stringsAsFactors = FALSE)
 #  head(lsoa)
 
 ## ---- eval=FALSE--------------------------------------------------------------
@@ -36,7 +36,8 @@ knitr::include_graphics("images/routes_to_ferry.jpg")
 #                     toPlace = toPlace,
 #                     fromID = fromPlace$geo_code,
 #                     toID = toPlace$geo_code,
-#                     get_geometry = FALSE)
+#                     get_geometry = FALSE,
+#                     distance_balance = TRUE)
 #  routes <- routes[,c("fromPlace","toPlace","duration")]
 #  # Use the tidyr package to go from long to wide format
 #  routes_matrix <- tidyr::pivot_wider(routes,
@@ -55,7 +56,7 @@ knitr::include_graphics("images/multicore.jpeg")
 #                      full_elevation = TRUE)
 
 ## ---- eval=FALSE--------------------------------------------------------------
-#  profile_raw <- route$elevation[[1]]
+#  profile_raw <- route$leg_elevation[[1]]
 #  plot(profile_raw$distance, profile_raw$second, type = "p",
 #       xlab = "distance along route", ylab = "elevation")
 

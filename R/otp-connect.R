@@ -171,7 +171,7 @@ check_router <- function(x) {
     stop("Object is not of class otpconnect, class is ", class(x))
   }
   check <- try(curl::curl_fetch_memory(make_url(x)), silent = TRUE)
-  if (class(check) == "try-error") {
+  if (inherits(check, "try-error")) {
     return(check[1])
   } else {
     return(check$status_code)
@@ -202,7 +202,7 @@ check_routers <- function(otpcon) {
   }
 
   check <- try(curl::curl_fetch_memory(url), silent = TRUE)
-  if (class(check) == "try-error") {
+  if (inherits(check, "try-error")) {
     return(paste0("Router ", make_url(otpcon), " does not exist"))
   }
 
@@ -240,23 +240,32 @@ otp_check_version <- function(otpcon, warn = TRUE) {
   }
 
   ver <- try(curl::curl_fetch_memory(url), silent = TRUE)
-  if ("try-error" %in% class(ver)) {
+  if (inherits(ver, "try-error")) {
     return(ver[1])
   }
 
   ver <- rawToChar(ver$content)
-  #ver <- RcppSimdJson::fparse(ver)
-  ver <- rjson::fromJSON(ver)
-  ver <- as.numeric(paste0(
+  ver <- RcppSimdJson::fparse(ver)
+  ver_res <- suppressWarnings(as.numeric(paste0(
     ver$serverVersion$major,
     ".",
     ver$serverVersion$minor
-  ))
+  )))
+  if(is.na(ver_res)){
+    # Fix for 2.2
+    ver_res <- as.numeric(paste0(
+      ver$version$major,
+      ".",
+      ver$version$minor
+    ))
+  }
+
+
   if (warn) {
-    if (ver != otpcon$otp_version) {
+    if (ver_res != otpcon$otp_version) {
       warning("The version of OTP running does not match otpcon$otp_version")
     }
   }
 
-  return(ver)
+  return(ver_res)
 }

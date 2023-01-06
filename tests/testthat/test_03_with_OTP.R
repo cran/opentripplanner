@@ -1,14 +1,11 @@
 # Check that require OTP to work
 
-on_cran <- function() !identical(Sys.getenv("NOT_CRAN"), "true")
+# library(testthat)
+# fls <- list.files("R", full.names = TRUE)
+# for(fl in fls){source(fl)}
+# Sys.setenv("NOT_CRAN" = "true")
 
-has_rcppsimdjson <- function() {
-  RcppSimdJsonVersion <- try(utils::packageVersion("RcppSimdJson") >= "0.1.2", silent = TRUE)
-  if (class(RcppSimdJsonVersion) == "try-error") {
-    RcppSimdJsonVersion <- FALSE
-  }
-  return(RcppSimdJsonVersion)
-}
+on_cran <- function() !identical(Sys.getenv("NOT_CRAN"), "true")
 
 skip_on_j11 <- function() {
   suppressWarnings(jv <- otp_check_java(2))
@@ -17,10 +14,15 @@ skip_on_j11 <- function() {
   }
 }
 
+skip_on_j17 <- function() {
+  suppressWarnings(jv <- otp_check_java(2.2))
+  if (jv) {
+    skip("Skip this test with Java 17")
+  }
+}
+
 # skip rules
 # skip on cran always
-# skip main functions if J11 and no json
-# skip legacy code if have json
 # skip J8 code on J11
 # Skip J11 code on J8
 
@@ -51,9 +53,9 @@ if (!on_cran()) {
   otp_dl_demo(path_data)
 
 
-  if (suppressWarnings(otp_check_java(2))) {
+  if (suppressWarnings(otp_check_java(2.2))) {
     path_otp <- otp_dl_jar(path_data,
-                           version = "2.0.0",
+                           version = "2.2.0",
                            cache = FALSE)
   } else {
     path_otp <- otp_dl_jar(path_data,
@@ -108,7 +110,17 @@ test_that("We can startup OTP", {
                                   wait = TRUE),
     regexp = "OTP is loading"
   )
-  Sys.sleep(60 * 5)
+
+  # Wait to see it OTP has started
+  for(j in 1:6){
+    otpcon <- try(otp_connect(router = "default"), silent = TRUE)
+    if(inherits(otpcon,"try-error")){
+      Sys.sleep(60)
+    } else {
+      break
+    }
+  }
+
 })
 
 context("Test the otp_connect function")
@@ -142,27 +154,43 @@ if (!on_cran()) {
 
 context("Test the otp_plan function")
 
+col_names <- c(
+  "fromPlace","toPlace",
+  "duration","startTime",
+  "endTime","walkTime",
+  "transitTime","waitingTime",
+  "walkDistance","walkLimitExceeded",
+  "generalizedCost","elevationLost",
+  "elevationGained","transfers",
+  "fare","tooSloped",
+  "arrivedAtDestinationWithRentedBicycle", "fare_currency",
+  "route_option","leg_startTime",
+  "leg_endTime","leg_departureDelay",
+  "leg_arrivalDelay","leg_realTime",
+  "leg_distance","leg_generalizedCost",
+  "leg_pathway","leg_mode",
+  "leg_transitLeg","leg_route",
+  "leg_agencyTimeZoneOffset","leg_interlineWithPreviousLeg",
+  "leg_rentedBike","leg_walkingBike",
+  "leg_duration",
+  "leg_agencyName","leg_agencyUrl","leg_routeType","leg_routeId",
+  "leg_agencyId","leg_tripId","leg_serviceDate","leg_routeShortName",
+  "leg_routeLongName",
+  "leg_flexDrtAdvanceBookMin",
+  "geometry"
+)
+
 test_that("basic routing", {
   skip_on_cran()
   route <- otp_plan(otpcon,
     fromPlace = c(-1.16489, 50.64990),
-    toPlace = c(-1.15803, 50.72515)
+    toPlace = c(-1.15803, 50.72515),
+    mode = "CAR"
   )
   expect_is(route, "sf")
   expect_true(nrow(route) == 1)
   expect_true(ncol(route) >= 32)
-  expect_true(all(names(route) %in%
-    c(
-      "duration", "startTime", "endTime", "walkTime",
-      "transitTime", "waitingTime", "walkDistance", "walkLimitExceeded",
-      "elevationLost", "elevationGained", "transfers", "tooSloped",
-      "fare", "fare_currency", "leg_startTime", "leg_endTime",
-      "departureDelay", "arrivalDelay", "realTime", "distance",
-      "pathway", "mode", "route", "agencyTimeZoneOffset",
-      "interlineWithPreviousLeg", "rentedBike", "flexDrtAdvanceBookMin", "leg_duration",
-      "transitLeg", "route_option", "fromPlace", "toPlace",
-      "geometry"
-    )))
+  expect_true(all(names(route) %in% col_names))
 })
 
 
@@ -171,45 +199,16 @@ test_that("transit routing", {
   route <- otp_plan(otpcon,
     fromPlace = c(-1.16489, 50.64990),
     toPlace = c(-1.15803, 50.72515),
-    date_time = as.POSIXct(strptime("2021-06-03 13:30", "%Y-%m-%d %H:%M")),
+    date_time = as.POSIXct(strptime("2022-06-03 13:30", "%Y-%m-%d %H:%M")),
     mode = c("WALK", "TRANSIT"),
     numItineraries = 3
   )
   expect_is(route, "sf")
-  expect_true(nrow(route) >= 7)
+  expect_true(nrow(route) >= 6)
   expect_true(ncol(route) >= 41)
-  col_names <- c(
-    "duration", "startTime", "endTime", "walkTime",
-    "transitTime", "waitingTime", "walkDistance", "walkLimitExceeded",
-    "elevationLost", "elevationGained", "transfers", "fare",
-    "tooSloped", "fare_currency", "leg_startTime", "leg_endTime",
-    "departureDelay", "arrivalDelay", "realTime", "distance",
-    "pathway", "mode", "route", "agencyTimeZoneOffset",
-    "interlineWithPreviousLeg", "rentedBike", "leg_duration",
-    "transitLeg", "agencyName", "agencyUrl",
-    "routeId", "agencyId", "tripId", "serviceDate",
-    "routeShortName", "routeLongName", "route_option", "fromPlace",
-    "toPlace", "geometry","alerts","intermediateStops",
-    "flexDrtAdvanceBookMin","routeType"
-  )
-
   expect_true(all(names(route) %in% col_names))
 })
 
-
-test_that("legacy code", {
-  skip_on_cran()
-  skip_on_j11()
-  route <- otp_plan_internal_legacy(otpcon,
-    fromPlace = matrix(c(50.64990, -1.16489), ncol = 2),
-    toPlace = matrix(c(50.72515, -1.15803), ncol = 2),
-    date = "2020-06-03",
-    time = "13:30"
-  )
-
-  expect_is(route, "sf")
-  expect_true(nrow(route) == 1)
-})
 
 
 test_that("no geometry routing", {
@@ -226,9 +225,6 @@ test_that("no geometry routing", {
 
 test_that("full elevation routing", {
   skip_on_cran()
-  if (!has_rcppsimdjson()) {
-    skip("Skip wihtout RcppSimdJson")
-  }
   route <- otp_plan(otpcon,
     fromPlace = c(-1.16489, 50.64990),
     toPlace = c(-1.15803, 50.72515),
@@ -237,7 +233,7 @@ test_that("full elevation routing", {
   expect_is(route, "sf")
   expect_true(nrow(route) == 1)
   expect_true(ncol(route) >= 32)
-  expect_is(route$elevation, "list")
+  expect_is(route$leg_elevation, "list")
 })
 
 
@@ -254,17 +250,6 @@ test_that("batch routing", {
   expect_is(routes, "sf")
   expect_true(nrow(routes) == 9)
   expect_true(ncol(routes) >= 32)
-  col_names <- c(
-    "duration", "startTime", "endTime", "walkTime",
-    "transitTime", "waitingTime", "walkDistance", "walkLimitExceeded",
-    "elevationLost", "elevationGained", "transfers", "tooSloped",
-    "fare", "fare_currency", "leg_startTime", "leg_endTime",
-    "departureDelay", "arrivalDelay", "realTime", "distance",
-    "pathway", "mode", "route", "agencyTimeZoneOffset",
-    "interlineWithPreviousLeg", "rentedBike", "flexDrtAdvanceBookMin", "leg_duration",
-    "transitLeg", "route_option", "fromPlace", "toPlace",
-    "geometry"
-  )
   expect_true(all(names(routes) %in% col_names))
 })
 
@@ -304,6 +289,7 @@ context("Test the otp_isochone function")
 test_that("basic isochrone", {
   skip_on_cran()
   skip_on_j11()
+  skip_on_j17()
   ferry_current <- otp_isochrone(
     otpcon = otpcon,
     fromPlace = c(-1.159494, 50.732429), # lng/lat of Ryde ferry
@@ -342,6 +328,7 @@ test_that("basic isochrone", {
 test_that("nonsence isochrone", {
   skip_on_cran()
   skip_on_j11()
+  skip_on_j17()
   expect_warning(otp_isochrone(
     otpcon = otpcon,
     fromPlace = c(-5, 5)
@@ -353,6 +340,7 @@ context("Test the otp_geocode function")
 test_that("basic geocode", {
   skip_on_cran()
   skip_on_j11()
+  skip_on_j17()
   stations <- otp_geocode(
     otpcon = otpcon,
     query = "station"
@@ -366,6 +354,7 @@ test_that("basic geocode", {
 test_that("geocode coords", {
   skip_on_cran()
   skip_on_j11()
+  skip_on_j17()
   stations <- otp_geocode(
     otpcon = otpcon,
     query = "station", type = "Coordinates"
@@ -377,6 +366,7 @@ test_that("geocode coords", {
 test_that("geocode both", {
   skip_on_cran()
   skip_on_j11()
+  skip_on_j17()
   stations <- otp_geocode(
     otpcon = otpcon,
     query = "station", type = "Both"
@@ -388,6 +378,7 @@ test_that("geocode both", {
 test_that("geocode nonsence", {
   skip_on_cran()
   skip_on_j11()
+  skip_on_j17()
   expect_warning(otp_geocode(
     otpcon = otpcon,
     query = "jhgfdhgdcmhxgfxgfx"
@@ -410,6 +401,7 @@ context("Test the analyst functions")
 test_that("We can startup OTP with the analyst", {
   skip_on_cran()
   skip_on_j11()
+  skip_on_j17()
   expect_message(log <- otp_setup(otp = path_otp,
                                   dir = path_data,
                                   router = "default",
@@ -418,12 +410,21 @@ test_that("We can startup OTP with the analyst", {
                                   pointsets = TRUE),
                  regexp = "OTP is loading"
   )
-  Sys.sleep(60 * 5)
+  # Wait to see it OTP has started
+  for(j in 1:10){
+    otpcon <- try(otp_connect(router = "default"), silent = TRUE)
+    if(inherits(otpcon,"try-error")){
+      Sys.sleep(60)
+    } else {
+      break
+    }
+  }
 })
 
 test_that("Can connect to OTP", {
   skip_on_cran()
   skip_on_j11()
+  skip_on_j17()
   expect_message(
     otp_connect(router = "default"),
     "Router http://localhost:8080/otp/routers/default exists"
@@ -437,6 +438,7 @@ if (!on_cran()) {
 test_that("Make a tt matrix", {
   skip_on_cran()
   skip_on_j11()
+  skip_on_j17()
   ttmatrix <- otp_traveltime(otpcon,
                              path_data,
                              fromPlace = lsoa[1:5,],
@@ -451,18 +453,20 @@ test_that("Make a tt matrix", {
 test_that("Make a tt raster", {
   skip_on_cran()
   skip_on_j11()
+  skip_on_j17()
   surface <- otp_make_surface(otpcon = otpcon,
                              fromPlace = c(-1.17502,50.64590),
                              mode = "CAR")
 
   r <- otp_surface_isochrone(otpcon, surface = surface)
-  expect_is(r, "RasterLayer")
+  expect_is(r, "SpatRaster")
 })
-
 
 
 test_that("otp_stop", {
   skip_on_cran()
+  skip_on_j11()
+  skip_on_j17()
   foo <- otp_stop(FALSE)
   if (checkmate::test_os("windows")) {
     expect_true(grepl("SUCCESS", foo))

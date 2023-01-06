@@ -12,23 +12,20 @@
 
 <meta name="author" content="Malcolm Morgan" />
 
-<meta name="date" content="2022-01-20" />
+<meta name="date" content="2023-01-05" />
 
 <title>Known Issues</title>
 
-<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
-// v0.0.1
-// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
-
-document.addEventListener('DOMContentLoaded', function() {
-  const codeList = document.getElementsByClassName("sourceCode");
-  for (var i = 0; i < codeList.length; i++) {
-    var linkList = codeList[i].getElementsByTagName('a');
-    for (var j = 0; j < linkList.length; j++) {
-      if (linkList[j].innerHTML === "") {
-        linkList[j].setAttribute('aria-hidden', 'true');
-      }
-    }
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
   }
 });
 </script>
@@ -41,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
     </style>
+
 
 
 
@@ -241,70 +239,99 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Known Issues</h1>
 <h4 class="author">Malcolm Morgan</h4>
-<h4 class="date">2022-01-20</h4>
+<h4 class="date">2023-01-05</h4>
 
 
 
-<p>This vignette highlights some known limitations or bugs with OpenTripPlanner as well as suggested solutions.</p>
+<p>This vignette highlights some known limitations or bugs with
+OpenTripPlanner as well as suggested solutions.</p>
 <div id="getting-help-and-reporting-bugs" class="section level2">
 <h2>Getting help and reporting bugs</h2>
 <div id="opentripplanner" class="section level3">
 <h3>OpenTripPlanner</h3>
 <ul>
-<li><a href="https://groups.google.com/forum/#!forum/opentripplanner-users">OTP Users Group</a></li>
-<li><a href="https://github.com/opentripplanner/OpenTripPlanner/issues">OTP GitHub Issues</a></li>
+<li><a href="https://groups.google.com/forum/#!forum/opentripplanner-users">OTP
+Users Group</a></li>
+<li><a href="https://github.com/opentripplanner/OpenTripPlanner/issues">OTP
+GitHub Issues</a></li>
 </ul>
 </div>
 <div id="opentripplanner-for-r" class="section level3">
 <h3>OpenTripPlanner for R</h3>
 <ul>
-<li><a href="https://github.com/ropensci/opentripplanner/issues">OTP GitHub Issues</a></li>
+<li><a href="https://github.com/ropensci/opentripplanner/issues">OTP
+GitHub Issues</a></li>
 </ul>
 </div>
 </div>
 <div id="reasons-for-graph-building-to-fail" class="section level2">
 <h2>Reasons for Graph building to Fail</h2>
-<p>The <code>otp_build_graph()</code> function returns the log from OTP, so the reasons for failures should be documented in the log. Common problems include.</p>
+<p>The <code>otp_build_graph()</code> function returns the log from OTP,
+so the reasons for failures should be documented in the log. Common
+problems include.</p>
 <div id="cant-allocate-memory" class="section level3">
 <h3>Can’t allocate memory</h3>
 <p>If you get the error:</p>
 <p><code>Invalid maximum heap size: The specified size exceeds the maximum representable size.</code></p>
-<p>Then the <code>memory</code> argument in <code>otp_build_graph()</code> is too large. This may be because you have set it to more than the amount of RAM on your computer or because you have the 32 bit version of Java rather than the 64 Bit version installed.</p>
+<p>Then the <code>memory</code> argument in
+<code>otp_build_graph()</code> is too large. This may be because you
+have set it to more than the amount of RAM on your computer or because
+you have the 32 bit version of Java rather than the 64 Bit version
+installed.</p>
 </div>
 <div id="ran-out-of-memory" class="section level3">
 <h3>Ran out of memory</h3>
-<p>A graph build can fail due to lack of memory. You can increase the memory allocated using the <code>memory</code> argument in <code>otp_build_graph()</code>.</p>
+<p>A graph build can fail due to lack of memory. You can increase the
+memory allocated using the <code>memory</code> argument in
+<code>otp_build_graph()</code>.</p>
 </div>
 <div id="bad-input-data" class="section level3">
 <h3>Bad input data</h3>
-<p>If you have multiple input files (e.g. GTFS timetables, elevation, config files) and your graph build is failing, try removing all but the PBF file and seeing if the graph can now successfully build. If it does, add files one at a time until you find the file that is causing the build to fail.</p>
+<p>If you have multiple input files (e.g. GTFS timetables, elevation,
+config files) and your graph build is failing, try removing all but the
+PBF file and seeing if the graph can now successfully build. If it does,
+add files one at a time until you find the file that is causing the
+build to fail.</p>
 </div>
 </div>
 <div id="reasons-for-routing-to-fail" class="section level2">
 <h2>Reasons for Routing to Fail</h2>
-<p>If you find OTP can not find a route here are some common reasons to check:</p>
+<p>If you find OTP can not find a route here are some common reasons to
+check:</p>
 <div id="start-or-end-is-too-far-from-the-road-network" class="section level3">
 <h3>Start or End is too far from the road network</h3>
-<p>OTP will snap fromPlace and toPlace coordinates to the road network, but only for a limited distance. If your points are far from the road network (e.g. in a lake or middle of a park) then OTP will fail to find a route.</p>
+<p>OTP will snap fromPlace and toPlace coordinates to the road network,
+but only for a limited distance. If your points are far from the road
+network (e.g. in a lake or middle of a park) then OTP will fail to find
+a route.</p>
 </div>
 <div id="mode-specific-limits" class="section level3">
 <h3>Mode Specific Limits</h3>
-<p>OTP does not support all mode combinations (e.g. walk + drive) so some places may only be accessible by certain modes. For example, you can’t walk on a motorway or drive on a path. Use the debug layers to check for mode restrictions.</p>
+<p>OTP does not support all mode combinations (e.g. walk + drive) so
+some places may only be accessible by certain modes. For example, you
+can’t walk on a motorway or drive on a path. Use the debug layers to
+check for mode restrictions.</p>
 </div>
 <div id="maximum-walk-to-transit" class="section level3">
 <h3>Maximum walk to transit</h3>
-<p>By default, OTP caps the maximum walking distance to a transit stop at a low level, so some areas are unreachable by transit. Increase the maximum walking distance to get better results.</p>
+<p>By default, OTP caps the maximum walking distance to a transit stop
+at a low level, so some areas are unreachable by transit. Increase the
+maximum walking distance to get better results.</p>
 </div>
 <div id="driving-on-roads-with-cycleway-tag" class="section level3">
 <h3>Driving on Roads with cycleway tag</h3>
-<p>A known bug that stops driving on any road with cycling infrastructure. <a href="https://groups.google.com/forum/#!topic/opentripplanner-users/BOv1J32k6Sc" class="uri">https://groups.google.com/forum/#!topic/opentripplanner-users/BOv1J32k6Sc</a></p>
+<p>A known bug that stops driving on any road with cycling
+infrastructure. <a href="https://groups.google.com/forum/#!topic/opentripplanner-users/BOv1J32k6Sc" class="uri">https://groups.google.com/forum/#!topic/opentripplanner-users/BOv1J32k6Sc</a></p>
 </div>
 <div id="multicore-instability" class="section level3">
 <h3>Multicore instability</h3>
 <p>If you get the error:</p>
 <p><code>Error in unserialize(socklist[[n]]) : error reading from connection</code></p>
-<p>It means that one of the parallel workers has crashed. Try running your routing in smaller batches like this:</p>
-<p>This code will break the routing into 5 batches and put the results into a list called <code>routes_list</code> before binding them together into the finished <code>routes</code> data frame.</p>
+<p>It means that one of the parallel workers has crashed. Try running
+your routing in smaller batches like this:</p>
+<p>This code will break the routing into 5 batches and put the results
+into a list called <code>routes_list</code> before binding them together
+into the finished <code>routes</code> data frame.</p>
 <pre><code>routes_list &lt;- list()
 n &lt;- split(1:nrow(fromPlace), cut(1:nrow(fromPlace), 5))
 
@@ -322,12 +349,19 @@ routes &lt;- dplyr::bind_rows(routes_list)
 </div>
 <div id="speeding-up-routing" class="section level2">
 <h2>Speeding up routing</h2>
-<p>If you are doing a large amount of routing consider the following options.</p>
+<p>If you are doing a large amount of routing consider the following
+options.</p>
 <ol style="list-style-type: decimal">
-<li>Use multicore routing using <code>ncores</code> argument of <code>otp_plan()</code></li>
-<li>Reduce the area, for example, if you are only routing in one city you don’t need a whole country graph.</li>
-<li>Remove unneeded roads using <a href="https://wiki.openstreetmap.org/wiki/Osmfilter">osmfilter</a> or <a href="https://github.com/ITSLeeds/OSMtools">OSMtools</a> for example if you are only interested in driving you can remove footpaths and cycleways. This will simplify your graph and provide a small performance boost.</li>
-<li>Upgrading your computer, a new fast CPU with more cores will route faster.</li>
+<li>Use multicore routing using <code>ncores</code> argument of
+<code>otp_plan()</code></li>
+<li>Reduce the area, for example, if you are only routing in one city
+you don’t need a whole country graph.</li>
+<li>Remove unneeded roads using <a href="https://wiki.openstreetmap.org/wiki/Osmfilter">osmfilter</a> or <a href="https://github.com/ITSLeeds/OSMtools">OSMtools</a> for example if
+you are only interested in driving you can remove footpaths and
+cycleways. This will simplify your graph and provide a small performance
+boost.</li>
+<li>Upgrading your computer, a new fast CPU with more cores will route
+faster.</li>
 </ol>
 </div>
 <div id="gtfs-data-for-the-uk" class="section level2">
@@ -336,8 +370,13 @@ routes &lt;- dplyr::bind_rows(routes_list)
 </div>
 <div id="elevation-data" class="section level2">
 <h2>Elevation Data</h2>
-<p>It is common for GeoTIFF to have a no data value often the maximum possible value. OTP can misinterpret this as an elevation value. So set your no data values in your elevation data to something more plausible like 0.</p>
-<p>Note that OTP does not support all types of GeoTIFF compression so you may have to change the compression type of the image if you are experiencing problems.</p>
+<p>It is common for GeoTIFF to have a no data value often the maximum
+possible value. OTP can misinterpret this as an elevation value. So set
+your no data values in your elevation data to something more plausible
+like 0.</p>
+<p>Note that OTP does not support all types of GeoTIFF compression so
+you may have to change the compression type of the image if you are
+experiencing problems.</p>
 </div>
 
 

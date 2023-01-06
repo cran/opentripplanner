@@ -123,7 +123,7 @@ otp_build_graph <- function(otp = NULL,
   message(" ")
 
 
-  if ("try-error" %in% class(set_up)) {
+  if (inherits(set_up, "try-error")) {
     stop(paste0("Graph Build Failed: ", set_up[1]))
   }
 
@@ -511,7 +511,7 @@ otp_check_java <- function(otp_version = 1.5) {
   checkmate::assert_numeric(otp_version, lower = 1, upper = 2.999)
   # Check we have correct verrsion of Java
   java_version <- try(system2("java", "-version", stdout = TRUE, stderr = TRUE))
-  if (class(java_version) == "try-error") {
+  if (inherits(java_version, "try-error")) {
     warning("R was unable to detect a version of Java")
     return(FALSE)
   } else {
@@ -531,7 +531,12 @@ otp_check_java <- function(otp_version = 1.5) {
       }
 
       if (java_version == 11) {
-        warning("You have OTP 1.x but the version of Java for OTP 2.x")
+        warning("You have OTP 1.x but the version of Java for OTP 2.0 or 2.1")
+        return(FALSE)
+      }
+
+      if (java_version == 17) {
+        warning("You have OTP 1.x but the version of Java for OTP 2.2+")
         return(FALSE)
       }
 
@@ -539,18 +544,43 @@ otp_check_java <- function(otp_version = 1.5) {
       return(FALSE)
     }
 
-    if (otp_version >= 2) {
+    if (otp_version >= 2 & otp_version <= 2.1) {
       if (java_version >= 1.8 & java_version < 1.9) {
-        warning("You have OTP 2.x but the version of Java for OTP 1.x")
+        warning("You have OTP 2.0 or 2.1 but the version of Java for OTP 1.x")
         return(FALSE)
       }
 
       if (java_version == 11) {
-        message("You have the correct version of Java for OTP 2.x")
+        message("You have the correct version of Java for OTP 2.0 or 2.1")
         return(TRUE)
       }
 
+      if (java_version == 17) {
+        warning("You have OTP 2.0 or 2.1 but the version of Java for OTP 2.2+")
+        return(FALSE)
+      }
+
       warning("OTP 2.x requires Java version 11 you have version ", java_version)
+      return(FALSE)
+    }
+
+    if (otp_version >= 2.2) {
+      if (java_version >= 1.8 & java_version < 1.9) {
+        warning("You have OTP 2.2+ but the version of Java for OTP 1.x")
+        return(FALSE)
+      }
+
+      if (java_version == 11) {
+        warning("You have OTP 2.2+ but the version of Java for OTP 2.0 or 2.1")
+        return(FALSE)
+      }
+
+      if (java_version == 17) {
+        message("You have the correct version of Java for OTP 2.2+")
+        return(TRUE)
+      }
+
+      warning("OTP 2.2+ requires Java version 17 you have version ", java_version)
       return(FALSE)
     }
 
@@ -569,12 +599,10 @@ otp_version_check <- function(otp) {
   otp_version <- strsplit(otp, "/")[[1]]
   otp_version <- otp_version[length(otp_version)]
   otp_version <- gsub("[^[:digit:]., ]", "", otp_version)
-  otp_version <- substr(otp_version, 1, 1)
-  if (otp_version == "1") {
-    return(1)
-  } else if (otp_version == "2") {
-    return(2)
-  } else {
+  otp_version <- substr(otp_version, 1, 3)
+  otp_version <- as.numeric(otp_version)
+  if(is.na(otp_version)){
     stop("Unable to detect OTP version, please specify using otp_version")
   }
+  return(otp_version)
 }

@@ -21,7 +21,9 @@ knitr::opts_chunk$set(
 knitr::include_graphics("images/analyst.jpg")
 
 ## ---- eval=FALSE--------------------------------------------------------------
-#  lsoa <- sf::st_read("https://github.com/ropensci/opentripplanner/releases/download/0.1/centroids.gpkg", stringsAsFactors = FALSE)
+#  download.file("https://github.com/ropensci/opentripplanner/releases/download/0.1/centroids.gpkg",
+#                "centroids.gpkg", mode = "wb")
+#  lsoa <- sf::st_read("centroids.gpkg", stringsAsFactors = FALSE)
 #  lsoa$jobs <- sample(100:500, nrow(lsoa))
 #  otp_pointset(lsoa, "lsoa", path_data)
 
@@ -56,7 +58,7 @@ knitr::include_graphics("images/ttimes.jpg")
 #  isochone <- otp_surface_isochrone(otpcon, surfaceid)
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  library(raster)
+#  library(terra)
 #  plot(isochone)
 
 ## ---- echo = FALSE, fig.align='center', fig.cap="\\label{fig:ttimes}Isochone Raster"----

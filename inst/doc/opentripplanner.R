@@ -58,7 +58,7 @@ knitr::include_graphics("images/otpwebgui.jpg")
 #  # install.packages("tmap") # Only needed if you don't have tmap
 #  library(tmap)              # Load the tmap package
 #  tmap_mode("view")          # Set tmap to interactive viewing
-#  qtm(route)      # Plot the route on a map
+#  qtm(route)                 # Plot the route on a map
 
 ## ---- eval = FALSE------------------------------------------------------------
 #  otp_stop()

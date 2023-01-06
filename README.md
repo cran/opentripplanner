@@ -5,7 +5,7 @@
 
 [![R build
 status](https://github.com/ropensci/opentripplanner/workflows/R-CMD-check/badge.svg)](https://github.com/ropensci/opentripplanner/actions)
-[![codecov](https://app.codecov.io/gh/ropensci/opentripplanner/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ropensci/opentripplanner)
+[![codecov](https://codecov.io/gh/ropensci/opentripplanner/branch/master/graph/badge.svg?token=iLEB77PnMk)](https://app.codecov.io/gh/ropensci/opentripplanner)
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
@@ -13,7 +13,7 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3558311.svg)](https://doi.org/10.5281/zenodo.3558311)
 [![status](https://joss.theoj.org/papers/10.21105/joss.01926/status.svg)](https://joss.theoj.org/papers/10.21105/joss.01926)
 [![](https://cranlogs.r-pkg.org/badges/grand-total/opentripplanner)](https://cran.r-project.org/package=opentripplanner)
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/opentripplanner)](https://cran.r-project.org/package=opentripplanner)
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/opentripplanner)](https://cran.r-project.org/package=opentripplanner)
 
 **opentripplanner** is an R package that provides a simple yet flexible
 interface to [OpenTripPlanner (OTP)](https://www.opentripplanner.org/).
@@ -29,6 +29,15 @@ vignette](https://docs.ropensci.org/opentripplanner/articles/opentripplanner.htm
 while advanced functionality such as batch routing, isochrones, and
 customised setup is described in the [advanced features
 vignette](https://docs.ropensci.org/opentripplanner/articles/advanced_features.html).
+
+## What’s New
+
+The newest version of the package 0.5.0 (Jan 2023) focuses on increased
+routing speeds (3-4x faster) and expanding support for OTP v2.2. The new
+version also drops legacy support for R 3.6, and so now requires R 4.0
+or later. See
+[news](https://docs.ropensci.org/opentripplanner/news/index.html) for
+more details.
 
 ## Installation
 
@@ -59,20 +68,6 @@ remotes::install_github("ropensci/opentripplanner")
 library(opentripplanner)
 ```
 
-#### RcppSimdJson
-
-From version 0.3.0 of `opentripplanner` the package `RcppSimdJson` is
-used for JSON parsing. This package is not supported on some older
-versions of R (\<= 3.6) and some older Operating Systems. To meet CRAN
-requirements version 0.3.1 added a legacy mode for older versions of R.
-This legacy mode has reduced functionality and users on old systems may
-get better results using version 0.2.3 of the package. You can install
-older versions using **remotes**.
-
-``` r
-remotes::install_version("opentripplanner", "0.2.3")
-```
-
 ## Usage
 
 The package contains three groups of functions:
@@ -95,8 +90,8 @@ Functions for connecting to a local or remote instance of OTP:
 Functions for retrieving data from OTP:
 
 1.  `otp_plan()` To get routes from A to B;
-2.  `otp_geocode()` To get the locations of named places e.g. road
-    names.
+2.  `otp_geocode()` To get the locations of named places e.g. road names
+    (OTP 1.x only);
 3.  `otp_isochrone()` To get isochrone maps (OTP 1.x only);
 4.  `otp_make_surface()` To make an analyst surface (OTP 1.x only);
 5.  `otp_surface()` To evaluate a analyst surface (OTP 1.x only);
@@ -130,4 +125,4 @@ Please cite the JOSS paper in publications:
 Morgan et al., (2019). OpenTripPlanner for R. Journal of Open Source
 Software, 4(44), 1926, <https://doi.org/10.21105/joss.01926>
 
-[![ropensci\_footer](https://ropensci.org/public_images/ropensci_footer.png)](https://ropensci.org)
+[![ropensci_footer](https://ropensci.org/public_images/ropensci_footer.png)](https://ropensci.org)

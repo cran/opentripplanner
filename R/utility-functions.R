@@ -62,28 +62,25 @@ parse_leg <- function(leg,
   leg$to <- NULL
 
   if (get_elevation | full_elevation) {
-    elevation <- lapply(leg$steps, parse_elevation)
+    elevation <- purrr::map(leg$steps, parse_elevation)
   } else {
-    elevation <- NULL
+    elevation <- list(NULL)
   }
+
+  leg$steps <- NULL
+  leg$legElevation <- NULL #2.2 Only
 
   if (full_elevation) {
     leg$elevation <- elevation
   }
 
-  leg$steps <- NULL
-
   if (get_geometry) {
     # Extract geometry
-    legGeometry <- list()
-    for (i in seq_len(nrow(leg))) {
-      legGeometry[[i]] <- polyline2linestring(line = leg$legGeometry[[i]]$points, elevation = elevation[[i]])
-    }
-
-    leg$geometry <- sf::st_sfc(legGeometry, crs = 4326)
+    legGeometry <- purrr::map2(.x = leg$legGeometry,
+                               .y = elevation,
+                               .f = polyline2linestring)
+    leg$geometry <- legGeometry
     leg$legGeometry <- NULL
-    # leg <- sf::st_sf(leg)
-    leg <- df2sf(leg)
   } else {
     leg$legGeometry <- NULL
   }
@@ -101,13 +98,11 @@ parse_elevation <- function(stp) {
   if (is.null(stp)) {
     return(NA)
   }
-
   # Check for OTP1 or OTP2
-  if(class(stp$elevation) == "character"){
-    elev <- stp$elevation
-    elev <- strsplit(elev,",")
-    elev <- lapply(elev, as.numeric)
-    elev <- lapply(elev, split_alternating)
+  if(inherits(stp$elevation, "character")){
+    elev <- strsplit(stp$elevation,",")
+    elev <- purrr::map(elev, as.numeric)
+    elev <- purrr::map(elev, split_alternating)
     elev <- data.table::rbindlist(elev, idcol = "step")
   } else {
     elev <- data.table::rbindlist(stp$elevation, idcol = "step")
@@ -116,14 +111,14 @@ parse_elevation <- function(stp) {
   return(as.data.frame(elev))
 }
 
-#' Split vector into two vectors by altnating values
+#' Split vector into two vectors by alternating values
 #' @param x vector
 #' @family internal
 #' @noRd
 split_alternating <- function(x){
-  odd <- seq_along(x) %% 2 == 1
-  distance <- x[odd]
-  elevation <- x[!odd]
-  return(data.frame(first = distance, second = elevation))
-
+  odd <- rep(c(TRUE,FALSE), length(x)/2)
+  return(data.frame(first = x[odd],
+                    second = x[!odd],
+                    check.names = FALSE,
+                    check.rows = FALSE))
 }

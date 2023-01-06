@@ -1,3 +1,25 @@
+# opentripplanner 0.5.0
+
+Version 0.5.0 is a significant rewrite of the package focusing on substantially faster routing. The package has moved from using multiple R workers requesting and parsing results from OTP to a two stage process. Stage 1 uses `curl` to send asynchronous requests to OTP. This stage should be as fast as OTP, and supports OTP's limit of 1.25x the number of cores. Stage 2 parses the JSON and converts it into a form usable in R. The parsing currently uses a single thread, but has been optimised and can now parse around 700-800 routes/second which is faster than OTP at around 40-50 routes/second/core. 
+
+Overall the new process is 3-4 times faster than v0.4.0 and uses less memory. Future development may add mulitcore support to the parsing stage for further speed improvements.
+
+Breaking Changes
+
+* surfaceID returned from `otp_make_surface` is now a list of lists to allow multiple inputs/outputs
+* removed legacy support for old version of R (<4.0) that don't support `RcppSimdJson` for older versions of R use version 0.2.3
+* Some columns returned by `otp_plan` have changed names. The names now start with "leg_" to show they are leg specific variables e.g. "mode" has become "leg_mode" 
+ 
+Other Changes
+
+* removed dependency on `raster` and `rgdal` replaced with `terra`
+* replaced multi-core routeing with asynchronous requests using `curl` resulting in faster routing and lower resource usage
+* remove `pbapply` dependency replaced with `progressr`
+* remove dependency on `lubridate`
+* default ncores argument changed from `1` to `round(parallel::detectCores() * 1.25) - 1`
+* Typos fixed in documentation
+* Support for OTP 2.2 and Java 17
+
 # opentripplanner 0.4.0
 
 * Fix broken or moved URLs
