@@ -1,7 +1,6 @@
-citHeader("To cite opentripplanner package in publications use:")
-
-citEntry(
-  entry    = "Article",
+bibentry(
+  header   = "To cite opentripplanner package in publications use:",
+  bibtype  = "Article",
   title    = "OpenTripPlanner for R",
   author = c(
   person("Malcolm Morgan"),
